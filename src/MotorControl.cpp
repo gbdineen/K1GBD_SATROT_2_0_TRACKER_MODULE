@@ -1,56 +1,71 @@
 #include "MotorControl.h"
 // #include "WS_Client.h"
 
+
 MotorControl::MotorControl()
 {
     std::cout << "MotorControl init\n";
 }
 
-// MotorControl::MotorControl(WS_Client * wsClient)
-// {
-//     //std::cout << "MotorControl init";
-//     this->wscMc = wsClient;
-   
-// }
-
-void MotorControl::initMotors()
+void MotorControl::begin()
 {
-    
-    //Serial.println("MotorControl::initMotors");
     
     AFMS.begin();
     myMotor->setSpeed(190);
     myMotor->run(RELEASE);
    
     pwm.begin();
-    //pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates
-    delay(50);
+    pwm.setPWMFreq(PWM_FREQUENCY);  // Analog servos run at ~50 Hz updates
+    //delay(50);
 
-    //wscMc->sendTextToServer("Motor Init");
+
 }
 
-void MotorControl::moveMotor(int pos)
+
+void MotorControl::moveServo(int spd)
 {
-    Serial.print("MotorControl::moveMotor - pwm: "); Serial.println(pos);
-    double lowRange = 0;
-    int highRange = 20;
-    int MIN_PULSE_WIDTH = 212;
-    int MAX_PULSE_WIDTH = 416;
-    float FREQUENCY = 50;
-
-    double pulse_wide, pulse_width;
-
-    pulse_wide = map(pos, lowRange, highRange, MIN_PULSE_WIDTH, MAX_PULSE_WIDTH);
-    pulse_width = int(float(pulse_wide) / 1000000 * FREQUENCY * 4096);
-
-    pwm.setPWMFreq(FREQUENCY);
-
-    Serial.print("pulse_wide: "); Serial.println(pulse_wide);
-    pwm.setPWM(0, 0, pulse_wide);
-    //pwm.setPWM(0, 0, pos);
+    Serial.print("MotorControl::moveMotor - pwm: "); Serial.println(spd);
+    uint16_t pulse_wide;
+    pulse_wide = map(spd, SERVO_LOW_RANGE, SERVO_HIGH_RANGE, MIN_PULSE_WIDTH, MAX_PULSE_WIDTH);
     
+    //Serial.print("pulse_wide: "); Serial.println(pulse_wide);
+    pwm.setPWM(0, 0, pulse_wide);
 }
 
+/*!
+ *  @brief  Moves one of the two servo motors - Azimuth or Elevation
+ *  @param  svo Servo number to control
+ *  @param  spd Speed of the move 0 (full off) - 9 (full on)
+ *  @param  dir CLOCKWISE, COUNTER_CLOCKWISE, FULL_STOP
+ */
+void MotorControl::moveServo(int svo, int spd, int dir)
+{
+    std::cout << "Incoming speed: " << spd << "\n";
+    //spd += 7;
+    switch (dir) {
+        case CLOCKWISE:
+        spd=9-spd;
+        break;
+       
+        case COUNTER_CLOCKWISE:
+        spd+=10;
+        break;
 
+        case FULL_STOP:
+        spd=9;
+        break;
+    }
 
+    //Serial.print("MotorControl::moveMotor: speed: "); Serial.print(spd);
+    std::cout << "Inverted Speed: " << spd << "  |  Direction: " << dir << "\n";
+    uint16_t pulse_wide = map(spd, SERVO_LOW_RANGE, SERVO_HIGH_RANGE, MIN_PULSE_WIDTH, MAX_PULSE_WIDTH);
+    
+    Serial.print("pulse_wide: "); Serial.println(pulse_wide);
+    pwm.setPWM(svo, 0, pulse_wide);
+}
+
+void MotorControl::moveDCMotor(int pos)
+{
+
+}
 

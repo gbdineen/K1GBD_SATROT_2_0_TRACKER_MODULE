@@ -23,10 +23,10 @@ class WS_Client
         WS_Client();
         WS_Client(MotorControl * mcPtr);
         ~WS_Client();
-        void initWebSocketClient();
+        bool begin();
         void webSocketLoop();
         void sendTextToServer(String s);
-        //void setMotorControl(MotorControl * mcObj);
+
 };
 
 #endif

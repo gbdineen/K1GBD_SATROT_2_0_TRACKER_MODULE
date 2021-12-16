@@ -28,7 +28,7 @@ void WS_Client::sendTextToServer(String s)
 }
 
 
-void WS_Client::initWebSocketClient()
+bool WS_Client::begin()
 {
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
@@ -48,6 +48,7 @@ void WS_Client::initWebSocketClient()
     wsc.setReconnectInterval(3000); // If the connect fails, rety the connection every 5 seconds
     wsc.enableHeartbeat(5000,3000,100);
     ///sendTextToServer("init I'M CONNECTED"); 
+    return true;
 }
 
 void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
@@ -71,10 +72,8 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
       StaticJsonDocument<200> obj;
       DeserializationError error = deserializeJson(obj, payload);
       String subject = obj["Subject"];
-      //Serial.println(subject);
-
       if (subject == "manualposition") {
-		  mc->moveMotor(obj["Position"]);
+		    mc->moveServo(obj["Servo"],obj["Position"],obj["Direction"]);
       }
 
 	break;

@@ -6,38 +6,47 @@
 #include <iostream>
 #include "Adafruit_PWMServoDriver.h"
 
-
+#define CLOCKWISE 0
+#define COUNTER_CLOCKWISE 1
+#define FULL_STOP 2
 
 class MotorControl
 {
     private:
-        #define SERVO_FREQ 50
-        #define DEGREE_OFFSET 1 // This is the amount +/- the servo can go past 
-                                // the targeted Az/El so the antenna doesn't blow
-                                // past the target and cause an infite bounce
+        
+        // LET'S DECLARE SOME CONSTANCES FOR INTERACTING WITH THE SERVOS
+        const int MIN_PULSE_WIDTH = 210;
+        const int MAX_PULSE_WIDTH = 410;
+        const float PWM_FREQUENCY = 50;
 
-        // *******************************************************
-        // setPWM() IN THE ADAFRUIT PWM LIBRARY
-        // ****  NOTE! CW NUMBERS ARE OPPOSITES. FASTER IS A LOWER NUMBER, SLOWER IS HIGHER. JUST FYI. 
-        #define SERVO_CW_MAX 370 // @ 100HZ
-        #define SERVO_CW_MIN 614 // @ 100HZ
-        #define SERVO_CCW_MIN 656 // @ 100HZ
-        #define SERVO_CCW_MAX 880 // @ 100HZ
-        #define SERVO_STOP 635 // @ 100Hz
 
+
+        /************************************************************************************
+        The Adafruit PWM library breaks the PWM signal into 64-bit resolution (0 - 4096)
+        but we don't need nearly that much granularity, so we'll scale it down to 4-bit
+        and use a scale of 0 - 15 like so:
+                    -------- 0 --------------- 7 -------------- 15 ----------
+                    -- FULL SPEED CW ------ FULL STOP ------ FULL SPEED CCW --
+        ************************************************************************************/
+        
+        const int SERVO_LOW_RANGE = 0;
+        const int SERVO_HIGH_RANGE = 18;
+        
         Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();  // Init PWM Driver
         Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
         Adafruit_DCMotor *myMotor = AFMS.getMotor(1);
 
-       // WS_Client * wscMc;
-        
-
     public:
         MotorControl();
-        //MotorControl(WS_Client * wsClient);
-        void initMotors();
-        void moveMotor(int pos);
+        void begin();
+        void moveServo(int spd);
+        void moveServo(int svo, int spd, int dir);
+        void moveDCMotor(int pos);
 };
 
 #endif
+
+// 0 1 2 3  4  5  6  7
+
+// 7 8 9 10 11 12 13 14
 

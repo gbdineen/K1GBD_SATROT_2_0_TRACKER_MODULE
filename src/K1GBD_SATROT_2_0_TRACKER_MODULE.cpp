@@ -9,14 +9,9 @@
 #include "WS_Client.h"
 #include "MotorControl.h"
 
-//WS_Client wsClient;
 MotorControl motorCtrl; 
 MotorControl * motorCtrlPtr = &motorCtrl;
 WS_Client wsClient(motorCtrlPtr);
-
-//WS_Client * wsClientPtr = &wsClient;
-
-
 
 void setup()
 {
@@ -24,9 +19,8 @@ void setup()
     while (!Serial) {
         ; // wait for serial port to connect. Needed for native USB
     }
-    wsClient.initWebSocketClient();
-    // wsClient.setMotorControl(motorCtrlPtr);
-    motorCtrl.initMotors();
+    wsClient.begin();
+    motorCtrl.begin();
 }
 
 void loop()

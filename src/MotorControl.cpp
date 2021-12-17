@@ -41,27 +41,38 @@ void MotorControl::moveServo(int spd)
 void MotorControl::moveServo(int svo, int spd, int dir)
 {
     std::cout << "Incoming speed: " << spd << "\n";
-    //spd += 7;
+
+    int pw;
     switch (dir) {
         case CLOCKWISE:
-        spd=9-spd;
+        //spd=(SERVO_HIGH_RANGE/2)-spd;
+        pw = calcPWM((SERVO_HIGH_RANGE/2)-spd);
         break;
        
         case COUNTER_CLOCKWISE:
-        spd+=10;
+        pw = calcPWM(spd+=(SERVO_HIGH_RANGE/2));
         break;
 
         case FULL_STOP:
-        spd=9;
+        //pw = calcPWM(SERVO_HIGH_RANGE/2);
+        pw = MAX_PULSE_WIDTH-(MIN_PULSE_WIDTH*2);
         break;
     }
 
     //Serial.print("MotorControl::moveMotor: speed: "); Serial.print(spd);
-    std::cout << "Inverted Speed: " << spd << "  |  Direction: " << dir << "\n";
-    uint16_t pulse_wide = map(spd, SERVO_LOW_RANGE, SERVO_HIGH_RANGE, MIN_PULSE_WIDTH, MAX_PULSE_WIDTH);
+    std::cout << "\t\t\tInverted Speed: " << spd << "  |  Direction: " << dir << "\n";
+
     
-    Serial.print("pulse_wide: "); Serial.println(pulse_wide);
-    pwm.setPWM(svo, 0, pulse_wide);
+    
+    Serial.print("pulse_wide: "); Serial.println(pw);
+    pwm.setPWM(svo, 0, pw);
+}
+
+int MotorControl::calcPWM(int spd)
+{
+    double pulse_wide = map(spd, SERVO_LOW_RANGE, SERVO_HIGH_RANGE, MIN_PULSE_WIDTH, MAX_PULSE_WIDTH);
+
+    return pulse_wide;
 }
 
 void MotorControl::moveDCMotor(int pos)

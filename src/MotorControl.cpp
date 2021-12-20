@@ -18,7 +18,6 @@ void MotorControl::begin()
     pwm.setPWMFreq(PWM_FREQUENCY);  // Analog servos run at ~50 Hz updates
     //delay(50);
 
-
 }
 
 

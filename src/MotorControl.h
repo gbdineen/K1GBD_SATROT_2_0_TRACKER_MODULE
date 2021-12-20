@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <Adafruit_MotorShield.h>
 #include <iostream>
+#include <istream>
 #include "Adafruit_PWMServoDriver.h"
 
 #define CLOCKWISE 0
@@ -47,8 +48,4 @@ class MotorControl
 };
 
 #endif
-
-// 0 1 2 3  4  5  6  7
-
-// 7 8 9 10 11 12 13 14
 

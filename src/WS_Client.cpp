@@ -9,10 +9,11 @@ WS_Client::WS_Client()
 }
 
 
-WS_Client::WS_Client(MotorControl * mcPtr) 
+WS_Client::WS_Client(MotorControl * mcPtr, PositionControl * pcPtr) 
 {
     std::cout << "WS_Client init\n";
-	this->mc = mcPtr;
+	  this->mc = mcPtr;
+    this->pc = pcPtr;
 }
 
 void WS_Client::webSocketLoop()
@@ -53,11 +54,15 @@ bool WS_Client::begin()
 
 void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 {
+
+ //Serial.print("WS_Client::webSocketEvent: "); Serial.println(type);
+
  switch (type) {
     case WStype_DISCONNECTED: // enum that read status this is used for debugging.
       // Serial.print("WS Type ");
       // Serial.print(type);
       //Serial.println(": DISCONNECTED");
+      wsc.sendPing();
       break;
     case WStype_CONNECTED:  // Check if a WebSocket client is connected or not
       //Serial.print("WS Type "); Serial.println(type); 
@@ -67,12 +72,15 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
       break;
     case WStype_TEXT: // check responce from client
       // Serial.print("WS Type "); Serial.println(type);
-      // String pay = String((char*) payload);
-      // Serial.println(pay);
+      String pay = String((char*) payload);
+      Serial.println(pay);
       StaticJsonDocument<200> obj;
       DeserializationError error = deserializeJson(obj, payload);
       String subject = obj["Subject"];
-      if (subject == "manualposition") {
+      
+      if (subject == "clientconnected") {
+        pc->initBNO();
+      } else if (subject == "manualposition") {
 		    mc->moveServo(obj["Servo"],obj["Position"],obj["Direction"]);
       }
 

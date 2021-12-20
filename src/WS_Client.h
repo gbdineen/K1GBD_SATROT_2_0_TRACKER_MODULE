@@ -7,6 +7,8 @@
 #include <ArduinoJson.h>
 #include <iostream>
 #include "MotorControl.h"
+#include "PositionControl.h"
+
 
 class WS_Client
 {
@@ -17,11 +19,12 @@ class WS_Client
         WebSocketsClient wsc;
         void webSocketEvent(WStype_t type, uint8_t * payload, size_t length);
         MotorControl * mc;
+        PositionControl * pc;
 
     public:
         
         WS_Client();
-        WS_Client(MotorControl * mcPtr);
+        WS_Client(MotorControl * mcPtr, PositionControl * pcPtr);
         ~WS_Client();
         bool begin();
         void webSocketLoop();

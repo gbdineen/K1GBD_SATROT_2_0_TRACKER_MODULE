@@ -4,14 +4,24 @@
 #include <Adafruit_MotorShield.h>
 #include "Adafruit_PWMServoDriver.h"
 #include <iostream>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
+#include <utility/imumaths.h>
+
 
 // Custom Classes   
 #include "WS_Client.h"
 #include "MotorControl.h"
+#include "PositionControl.h"
+#include "GuyTimer.h"
 
 MotorControl motorCtrl; 
 MotorControl * motorCtrlPtr = &motorCtrl;
-WS_Client wsClient(motorCtrlPtr);
+GuyTimer gTmr;
+GuyTimer * gTmrPtr = &gTmr;
+PositionControl posCtrl(gTmrPtr);
+PositionControl * posCtrlPtr = &posCtrl;
+WS_Client wsClient(motorCtrlPtr, posCtrlPtr);
 
 void setup()
 {

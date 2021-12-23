@@ -9,7 +9,6 @@ PositionControl::PositionControl(GuyTimer * guyTmr)
     this->gt = guyTmr;
 }
 
-
 void PositionControl::initBNO()
 { 
     if(!bno.begin()) {
@@ -19,12 +18,13 @@ void PositionControl::initBNO()
     } else {
         Serial.println("beginBNO");
         bno.setExtCrystalUse(true);
-        getCalStatus(false);
+        gt->setTimer(1000);
+        getCalStatus();
         //sendCalStatus();
     }
 }
 
-void PositionControl::getCalStatus(bool cb)
+void PositionControl::getCalStatus()
 {
     if (!systemCalibrated) {
         uint8_t system, gyro, accel, mag;
@@ -48,9 +48,8 @@ void PositionControl::getCalStatus(bool cb)
         //     gt->timerCheck(CbPtr);
         // }
     }
+    gt->~GuyTimer();
 }
-
-
 
 /* OLD VERSION OF void PositionControl::getCalStatus(void)
 void PositionControl::getCalStatus(void)
@@ -145,23 +144,6 @@ void PositionControl::getCalStatus(void)
     }
 }
 */
-
-// void PositionControl::myCalStatus(const char* s)
-// {
-//       std::cout << "PositionControl::myCalStatus: " << s << std::endl;
-//       sendCalStatus();
-// }
-
-bool PositionControl::sendCalStatus()
-{
-    unsigned long ct = millis();
-    using namespace std::placeholders;
-    //auto CbPtr = std::bind(&PositionControl::myCalStatus, this, _1);
-
-    //gt->timerCheck(CbPtr, ct);
-    
-    return true; 
-}
 
 PositionControl::~PositionControl()
 {

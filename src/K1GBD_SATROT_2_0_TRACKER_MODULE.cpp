@@ -20,7 +20,8 @@ MotorControl motorCtrl;
 MotorControl * motorCtrlPtr = &motorCtrl;
 GuyTimer gTmr;
 GuyTimer * gTmrPtr = &gTmr;
-PositionControl posCtrl(gTmrPtr);
+//PositionControl posCtrl(gTmrPtr);
+PositionControl posCtrl;
 PositionControl * posCtrlPtr = &posCtrl;
 WS_Client wsClient(motorCtrlPtr, posCtrlPtr);
 

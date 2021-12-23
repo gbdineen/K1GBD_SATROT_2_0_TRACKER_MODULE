@@ -5,11 +5,24 @@ GuyTimer::GuyTimer(/* args */)
 {
 }
 
-void GuyTimer::guyTimer(unsigned long timerMills) 
+GuyTimer::GuyTimer(std::function<void(bool)> cb, unsigned long timerMills)
 {
 
 }
 
+/*!
+ *  @brief  Set length in milliseconds of timer callback
+ *  @param  timerMillis milliseconds to count between each timer callback
+ */
+void GuyTimer::setTimer(unsigned long timerMillis)
+{
+    this->timerMillis = timerMillis;
+}
+
+void GuyTimer::guyTimer()
+{
+
+}
 
 void GuyTimer::timerCheck(std::function<void(const char*)> fn, unsigned long pt)
 {
@@ -23,9 +36,15 @@ void GuyTimer::timerCheck(std::function<void(const char*)> fn, unsigned long pt)
     this->prevTime=ct;
 }
 
-void GuyTimer::timerCheck(std::function<void(bool)> fn)
+template <typename T>
+void GuyTimer::timerCheck(std::function<void(T)> fn)
 {
     unsigned long ct = millis();
+
+    if (ct - this->prevTime >= this->millSecOne) {
+        
+    }
+
     //bool sw;
     //std::cout << "GuyTimer::timerCheck: prevTime " << this->prevTime << "\t|\t" << "GuyTimer::timerCheck: ct " << ct << std::endl;
     // if (ct - this->prevTime >= this->millSecOne) {
@@ -37,15 +56,22 @@ void GuyTimer::timerCheck(std::function<void(bool)> fn)
     // fn(sw);
 }
 
+void GuyTimer::timerCheck()
+{
+
+}
+
 void GuyTimer::loop() 
 {
     std::cout << "GuyTimer::loop()" << std::endl;
+    //GuyTimer * CbPtr = timerCheck;
+    //timerCheck(CbPtr);
 }
 
 void GuyTimer::loop(std::function<void(bool)> fn) 
 {
     std::cout << "GuyTimer::loop(withstuff)" << std::endl;
-    
+
 }
 
 GuyTimer::~GuyTimer()

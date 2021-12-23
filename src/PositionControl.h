@@ -23,11 +23,8 @@ class PositionControl
         PositionControl(/* args */);
         PositionControl(GuyTimer * guyTmr);
         void initBNO();
-        // void myCalStatus(const char* s);
-        bool sendCalStatus();
-        void getCalStatus(bool cb);
+        void getCalStatus();
         ~PositionControl();
 };
-
 
 #endif

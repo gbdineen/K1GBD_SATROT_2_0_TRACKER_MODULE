@@ -7,6 +7,7 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
+#include <functional>
 
 
 // Custom Classes   
@@ -36,4 +37,5 @@ void setup()
 void loop()
 {
     wsClient.webSocketLoop();
+    gTmr.loop();
 }

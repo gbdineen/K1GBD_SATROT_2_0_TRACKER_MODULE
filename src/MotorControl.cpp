@@ -39,7 +39,7 @@ void MotorControl::moveServo(int spd)
  */
 void MotorControl::moveServo(int svo, int spd, int dir)
 {
-    std::cout << "Incoming speed: " << spd << "\n";
+    //std::cout << "Incoming speed: " << spd << "\n";
 
     int pw;
     switch (dir) {
@@ -59,11 +59,11 @@ void MotorControl::moveServo(int svo, int spd, int dir)
     }
 
     //Serial.print("MotorControl::moveMotor: speed: "); Serial.print(spd);
-    std::cout << "\t\t\tInverted Speed: " << spd << "  |  Direction: " << dir << "\n";
+    //std::cout << "\t\t\tInverted Speed: " << spd << "  |  Direction: " << dir << "\n";
 
     
     
-    Serial.print("pulse_wide: "); Serial.println(pw);
+    //Serial.print("pulse_wide: "); Serial.println(pw);
     pwm.setPWM(svo, 0, pw);
 }
 

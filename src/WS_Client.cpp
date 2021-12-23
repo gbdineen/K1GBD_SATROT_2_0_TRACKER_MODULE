@@ -83,8 +83,7 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
       } else if (subject == "manualposition") {
 		    mc->moveServo(obj["Servo"],obj["Position"],obj["Direction"]);
       }
-
-	break;
+      break;
   }  
 }
 

@@ -3,23 +3,22 @@
 
 #include <Arduino.h>
 #include <functional>
+#include <iostream>
 //#include "PositionControl.h"
 
 class GuyTimer
 {
-    //
     private:
-        /* data */
+        unsigned long millSecOne = 1000;
+        unsigned long prevTime = 0;
     public:
         GuyTimer(/* args */);
-        //template <typename T, void(T::*func)()>
-        // template<class T>
-        // void timerCheck(T* instance, void (T::*fn)());
         
-        void timerCheck(std::function<void(const char*)> fn);
-
-       // void timerCheck(T * obj);
-        void forFun();
+        void guyTimer(unsigned long timerMills);
+        void timerCheck(std::function<void(const char*)> fn, unsigned long prevTime);
+        void timerCheck(std::function<void(bool)> fn);
+        void loop();
+        void loop(std::function<void(bool)> fn);
         ~GuyTimer();
 };
 

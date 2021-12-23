@@ -15,10 +15,6 @@ class PositionControl
         
         bool systemCalibrated;
         uint8_t systemCalibrationScore = 0;
-
-        //typedef void (PositionControl::*CbPtr)();
-        //void (PositionControl::*CbPtr)();
-        
         Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
         GuyTimer * gt;
         
@@ -27,9 +23,9 @@ class PositionControl
         PositionControl(/* args */);
         PositionControl(GuyTimer * guyTmr);
         void initBNO();
-        void myCalStatus(const char* s);
-        //template <typename F>
+        // void myCalStatus(const char* s);
         bool sendCalStatus();
+        void getCalStatus(bool cb);
         ~PositionControl();
 };
 

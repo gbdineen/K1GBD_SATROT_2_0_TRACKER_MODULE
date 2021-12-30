@@ -18,12 +18,17 @@ class GuyTimer
         GuyTimer(std::function<void(bool)> cb, unsigned long timerMills);
         
         void guyTimer();
+
+        void setup();
+        void loop();
+
+
         void timerCheck();
         void timerCheck(std::function<void(const char*)> fn, unsigned long prevTime);
         template <typename T>
         void timerCheck(std::function<void(T)> fn);
-        void loop();
-        void loop(std::function<void(bool)> fn);
+        //void loop();
+        ///void loop(std::function<void(bool)> fn);
         void setTimer(unsigned long timerMillis);
 
         ~GuyTimer();

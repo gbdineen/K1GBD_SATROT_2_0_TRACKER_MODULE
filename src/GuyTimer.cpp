@@ -3,10 +3,24 @@
 
 GuyTimer::GuyTimer(/* args */)
 {
+    std::cout << "GuyTime init" << std::endl;
 }
 
 GuyTimer::GuyTimer(std::function<void(bool)> cb, unsigned long timerMills)
 {
+    std::cout << "GuyTime init" << std::endl;
+}
+
+
+void GuyTimer::setup()
+{
+
+}
+
+void GuyTimer::loop()
+{
+
+    std::cout << "GuyTimer loop" << std::endl;
 
 }
 
@@ -61,18 +75,18 @@ void GuyTimer::timerCheck()
 
 }
 
-void GuyTimer::loop() 
-{
-    std::cout << "GuyTimer::loop()" << std::endl;
-    //GuyTimer * CbPtr = timerCheck;
-    //timerCheck(CbPtr);
-}
+// void GuyTimer::loop() 
+// {
+//     std::cout << "GuyTimer::loop()" << std::endl;
+//     //GuyTimer * CbPtr = timerCheck;
+//     //timerCheck(CbPtr);
+// }
 
-void GuyTimer::loop(std::function<void(bool)> fn) 
-{
-    std::cout << "GuyTimer::loop(withstuff)" << std::endl;
+// void GuyTimer::loop(std::function<void(bool)> fn) 
+// {
+//     std::cout << "GuyTimer::loop(withstuff)" << std::endl;
 
-}
+// }
 
 GuyTimer::~GuyTimer()
 {

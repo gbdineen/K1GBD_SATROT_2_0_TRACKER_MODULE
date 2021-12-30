@@ -18,8 +18,8 @@
 
 MotorControl motorCtrl; 
 MotorControl * motorCtrlPtr = &motorCtrl;
-GuyTimer gTmr;
-GuyTimer * gTmrPtr = &gTmr;
+//GuyTimer gTmr;
+//GuyTimer * gTmrPtr = &gTmr;
 //PositionControl posCtrl(gTmrPtr);
 PositionControl posCtrl;
 PositionControl * posCtrlPtr = &posCtrl;
@@ -38,5 +38,5 @@ void setup()
 void loop()
 {
     wsClient.webSocketLoop();
-    gTmr.loop();
+    //gTmr.loop();
 }

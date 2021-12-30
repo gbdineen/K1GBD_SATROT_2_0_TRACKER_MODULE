@@ -6,22 +6,22 @@ PositionControl::PositionControl(/* args */)
 
 PositionControl::PositionControl(GuyTimer * guyTmr)
 {
-    this->gt = guyTmr;
+    //this->gt = guyTmr;
 }
 
 void PositionControl::initBNO()
 { 
-    if(!bno.begin()) {
-        /* There was a problem detecting the BNO055 ... check your connections */
-        Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-        while(1);
-    } else {
-        Serial.println("beginBNO");
-        bno.setExtCrystalUse(true);
-        gt->setTimer(1000);
-        getCalStatus();
-        //sendCalStatus();
-    }
+    // if(!bno.begin()) {
+    //     /* There was a problem detecting the BNO055 ... check your connections */
+    //     Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+    //     while(1);
+    // } else {
+    //     Serial.println("beginBNO");
+    //     bno.setExtCrystalUse(true);
+    //     gt->setTimer(1000);
+    //     getCalStatus();
+    // }
+    getCalStatus();
 }
 
 void PositionControl::getCalStatus()
@@ -48,7 +48,7 @@ void PositionControl::getCalStatus()
         //     gt->timerCheck(CbPtr);
         // }
     }
-    gt->~GuyTimer();
+    GuyTimer gt;
 }
 
 /* OLD VERSION OF void PositionControl::getCalStatus(void)

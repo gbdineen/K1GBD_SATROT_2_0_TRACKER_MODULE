@@ -18,10 +18,10 @@
 
 MotorControl motorCtrl; 
 MotorControl * motorCtrlPtr = &motorCtrl;
-//GuyTimer gTmr;
-//GuyTimer * gTmrPtr = &gTmr;
-//PositionControl posCtrl(gTmrPtr);
-PositionControl posCtrl;
+GuyTimer gTmrPC;
+GuyTimer * gTmrPtr = &gTmrPC;
+PositionControl posCtrl(gTmrPtr);
+//PositionControl posCtrl;
 PositionControl * posCtrlPtr = &posCtrl;
 WS_Client wsClient(motorCtrlPtr, posCtrlPtr);
 
@@ -37,6 +37,6 @@ void setup()
 
 void loop()
 {
-    wsClient.webSocketLoop();
-    //gTmr.loop();
+    wsClient.loop();
+    gTmrPC.loop();
 }

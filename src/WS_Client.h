@@ -27,7 +27,7 @@ class WS_Client
         WS_Client(MotorControl * mcPtr, PositionControl * pcPtr);
         ~WS_Client();
         bool begin();
-        void webSocketLoop();
+        void loop();
         void sendTextToServer(String s);
 
 };

@@ -16,7 +16,7 @@ WS_Client::WS_Client(MotorControl * mcPtr, PositionControl * pcPtr)
     this->pc = pcPtr;
 }
 
-void WS_Client::webSocketLoop()
+void WS_Client::loop()
 {
     wsc.loop();
 }

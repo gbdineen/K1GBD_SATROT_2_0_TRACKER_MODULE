@@ -6,7 +6,7 @@ PositionControl::PositionControl(/* args */)
 
 PositionControl::PositionControl(GuyTimer * guyTmr)
 {
-    //this->gt = guyTmr;
+    this->gt = guyTmr;
 }
 
 void PositionControl::initBNO()
@@ -21,11 +21,16 @@ void PositionControl::initBNO()
     //     gt->setTimer(1000);
     //     getCalStatus();
     // }
-    getCalStatus();
+    auto CbPtr = std::bind(&PositionControl::getCalStatus, this);
+    //gt->guyTimer(std::bind(&PositionControl::getCalStatus, this),1000);
+    //PositionControl * ptr = &PositionControl::getCalStatus;
+    gt->guyTimer(CbPtr,1000);
+    //getCalStatus();
 }
 
 void PositionControl::getCalStatus()
 {
+    Serial.print("getCalStatus");
     if (!systemCalibrated) {
         uint8_t system, gyro, accel, mag;
         system = gyro = accel = mag = 0;
@@ -48,7 +53,6 @@ void PositionControl::getCalStatus()
         //     gt->timerCheck(CbPtr);
         // }
     }
-    GuyTimer gt;
 }
 
 /* OLD VERSION OF void PositionControl::getCalStatus(void)

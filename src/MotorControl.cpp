@@ -11,15 +11,13 @@ void MotorControl::begin()
 {
     
     AFMS.begin();
-    myMotor->setSpeed(190);
+    myMotor->setSpeed(255);
     myMotor->run(RELEASE);
    
     pwm.begin();
     pwm.setPWMFreq(PWM_FREQUENCY);  // Analog servos run at ~50 Hz updates
     //delay(50);
-
 }
-
 
 void MotorControl::moveServo(int spd)
 {
@@ -40,7 +38,6 @@ void MotorControl::moveServo(int spd)
 void MotorControl::moveServo(int svo, int spd, int dir)
 {
     //std::cout << "Incoming speed: " << spd << "\n";
-
     int pw;
     switch (dir) {
         case CLOCKWISE:
@@ -57,12 +54,8 @@ void MotorControl::moveServo(int svo, int spd, int dir)
         pw = MAX_PULSE_WIDTH-(MIN_PULSE_WIDTH*2);
         break;
     }
-
     //Serial.print("MotorControl::moveMotor: speed: "); Serial.print(spd);
     //std::cout << "\t\t\tInverted Speed: " << spd << "  |  Direction: " << dir << "\n";
-
-    
-    
     //Serial.print("pulse_wide: "); Serial.println(pw);
     pwm.setPWM(svo, 0, pw);
 }
@@ -70,12 +63,24 @@ void MotorControl::moveServo(int svo, int spd, int dir)
 int MotorControl::calcPWM(int spd)
 {
     double pulse_wide = map(spd, SERVO_LOW_RANGE, SERVO_HIGH_RANGE, MIN_PULSE_WIDTH, MAX_PULSE_WIDTH);
-
     return pulse_wide;
 }
 
-void MotorControl::moveDCMotor(int pos)
+void MotorControl::moveDCMotor(int dir)
 {
+    switch (dir)
+    {
+        case CLOCKWISE:
+        myMotor->run(FORWARD);
+        break;
 
+        case COUNTER_CLOCKWISE:
+        myMotor->run(BACKWARD);
+        break;
+
+        case FULL_STOP:
+        myMotor->run(RELEASE);
+        break;
+    }
 }
 

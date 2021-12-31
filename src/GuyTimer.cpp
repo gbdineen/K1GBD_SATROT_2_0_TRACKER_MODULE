@@ -3,7 +3,6 @@
 
 GuyTimer::GuyTimer(/* args */)
 {
-    std::cout << "GuyTime init" << std::endl;
 }
 
 GuyTimer::GuyTimer(std::function<void(bool)> cb, unsigned long timerMills)
@@ -11,58 +10,46 @@ GuyTimer::GuyTimer(std::function<void(bool)> cb, unsigned long timerMills)
     std::cout << "GuyTime init" << std::endl;
 }
 
-
-/*!
- *  @brief  Set length in milliseconds of timer callback
- *  @param  timerMillis milliseconds to count between each timer callback
- */
+void GuyTimer::guyTimer(std::function<void()> fn, unsigned long ms)
+{
+    this->cb = fn;
+    setTimer(ms);
+    timerEnabled=true; 
+}
 void GuyTimer::setTimer(unsigned long timerMillis)
 {
     this->timerMillis = timerMillis;
 }
 
-void GuyTimer::guyTimer(std::function<void()> fn, unsigned long ms)
-{
-    
-    this->cb = cb;
-    setTimer(ms);
-    timerEnabled=true;    
-    // unsigned long ct = millis();
-    // std::cout << "GuyTimer::timerCheck: prevTime " << this->prevTime << "\t|\t" << "GuyTimer::timerCheck: ct " << ct << std::endl;
-    // if (ct - this->prevTime >= this->millSecOne) {
-    
-    //     //fn("yay we  did it!");  
-    // }
-    // this->prevTime=ct;
-}
-
 void GuyTimer::timerCheck()
 {
     unsigned long ct = millis();
-    std::cout << "GuyTimer::timerCheck: prevTime " << this->prevTime << "\t|\t" << "GuyTimer::timerCheck: ct " << ct << std::endl;
-    if (ct - this->prevTime >= this->millSecOne) {
-    
-        cb(); 
+    if (ct - this->prevTime >= this->timerMillis) {
+        //std::cout << "GuyTimer::timerCheck: prevTime " << this->prevTime << "\t|\t" << "GuyTimer::timerCheck: ct " << ct << std::endl;
+        cb();
+        this->prevTime=ct;
     }
-    this->prevTime=ct;
 }
 
-//template <typename T>
-void GuyTimer::timerCheck(std::function<void()> fn, unsigned long pt)
+void GuyTimer::start()
 {
-    unsigned long ct = millis();
-    
-    std::cout << "GuyTimer::timerCheck: prevTime " << this->prevTime << "\t|\t" << "GuyTimer::timerCheck: ct " << ct << std::endl;
-    if (ct - this->prevTime >= this->millSecOne) {
-    
-        //fn("yay we  did it!");  
+    if (!timerEnabled)
+    {
+        timerEnabled=true;
     }
-    this->prevTime=ct;
+}
+
+void GuyTimer::stop()
+{
+    if (timerEnabled)
+    {
+        timerEnabled=false;
+    }
 }
 
 void GuyTimer::loop()
 {
-    if (timerEnabled) 
+    if (timerEnabled)
     {
         timerCheck();
     }

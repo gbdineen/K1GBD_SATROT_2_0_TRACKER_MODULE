@@ -13,18 +13,21 @@ class PositionControl
 {
     private:
         
+        bool calibrationActive;
         bool systemCalibrated;
         uint8_t systemCalibrationScore = 0;
         Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
         GuyTimer * gt;
-        
 
     public:
+        
         PositionControl(/* args */);
         PositionControl(GuyTimer * guyTmr);
         void initBNO();
         void getCalStatus();
+        void checkPosition();
         ~PositionControl();
+
 };
 
 #endif

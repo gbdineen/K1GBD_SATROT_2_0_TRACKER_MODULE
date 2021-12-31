@@ -11,48 +11,75 @@ PositionControl::PositionControl(GuyTimer * guyTmr)
 
 void PositionControl::initBNO()
 { 
-    // if(!bno.begin()) {
-    //     /* There was a problem detecting the BNO055 ... check your connections */
-    //     Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-    //     while(1);
-    // } else {
-    //     Serial.println("beginBNO");
-    //     bno.setExtCrystalUse(true);
-    //     gt->setTimer(1000);
-    //     getCalStatus();
-    // }
-    auto CbPtr = std::bind(&PositionControl::getCalStatus, this);
-    //gt->guyTimer(std::bind(&PositionControl::getCalStatus, this),1000);
-    //PositionControl * ptr = &PositionControl::getCalStatus;
-    gt->guyTimer(CbPtr,1000);
-    //getCalStatus();
+    if(!bno.begin())
+    {
+        /* There was a problem detecting the BNO055 ... check your connections */
+        Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+        while(1);
+    }
+    else
+    {
+        Serial.println("beginBNO");
+        bno.setExtCrystalUse(true);
+        auto CbPtr = std::bind(&PositionControl::getCalStatus, this);
+        gt->guyTimer(CbPtr,50);
+    }
+    
 }
 
 void PositionControl::getCalStatus()
 {
-    Serial.print("getCalStatus");
-    if (!systemCalibrated) {
+    if (!systemCalibrated)
+    {
         uint8_t system, gyro, accel, mag;
         system = gyro = accel = mag = 0;
         bno.getCalibration(&system, &gyro, &accel, &mag);
         systemCalibrationScore = system;
 
-        Serial.print("Sys:");
-        Serial.print(system);
-        Serial.print(" G:");
-        Serial.print(gyro);
-        Serial.print(" A:");
-        Serial.print(accel);
-        Serial.print(" M:");
-        Serial.print(mag);
-        Serial.println("");
-
-        // auto CbPtr = std::bind(&PositionControl::getCalStatus, this, std::placeholders::_1);
-
-        // if (cb) {
-        //     gt->timerCheck(CbPtr);
-        // }
+        if (systemCalibrationScore<3 && !bno.isFullyCalibrated())
+        {
+            Serial.print("Sys:");
+            Serial.print(system);
+            Serial.print(" Gx:");
+            Serial.print(gyro);
+            Serial.print(" A:");
+            Serial.print(accel);
+            Serial.print(" M:");
+            Serial.print(mag);
+            Serial.println("");
+        }
+        else 
+        {
+            calibrationActive=false;
+            systemCalibrated=true;
+            gt->stop();
+            auto CbPtr = std::bind(&PositionControl::checkPosition, this);
+            gt->guyTimer(CbPtr,50);
+            //checkPosition();
+        }
     }
+    else 
+    {
+        
+    }
+}
+
+void PositionControl::checkPosition()
+{
+    sensors_event_t event;
+    bno.getEvent(&event);
+    int posX = event.orientation.x;
+    int posY = event.orientation.y;
+    int posZ = -event.orientation.z;
+
+    Serial.print("\t");
+    Serial.print("X: ");
+    Serial.print(posX);
+    Serial.print("\tY: ");
+    Serial.print(posY);
+    Serial.print("\tZ: ");
+    Serial.print(posZ);
+    Serial.println("");
 }
 
 /* OLD VERSION OF void PositionControl::getCalStatus(void)

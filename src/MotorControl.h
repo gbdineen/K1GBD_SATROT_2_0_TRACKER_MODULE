@@ -20,8 +20,6 @@ class MotorControl
         const int MAX_PULSE_WIDTH = 1044;
         const float PWM_FREQUENCY = 100;
 
-
-
         /************************************************************************************
         The Adafruit PWM library breaks the PWM signal into 64-bit resolution (0 - 4096)
         but we don't need nearly that much granularity, so we'll scale it down to 4-bit
@@ -44,7 +42,7 @@ class MotorControl
         void begin();
         void moveServo(int spd);
         void moveServo(int svo, int spd, int dir);
-        void moveDCMotor(int pos);
+        void moveDCMotor(int dir);
 };
 
 #endif

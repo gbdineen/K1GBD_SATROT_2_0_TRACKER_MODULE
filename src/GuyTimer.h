@@ -13,19 +13,18 @@ class GuyTimer
         unsigned long prevTime = 0;
         unsigned long timerMillis;
         bool timerEnabled;
-        void (*cb)();
+        std::function<void()> cb;
         
     public:
         GuyTimer(/* args */);
         GuyTimer(std::function<void(bool)> cb, unsigned long timerMills);
         
         void guyTimer(std::function<void()> fn, unsigned long pt);
-        void loop();
-
-        void timerCheck();
-        //template <typename T>
-        void timerCheck(std::function<void()> fn, unsigned long ms);
         void setTimer(unsigned long timerMillis);
+        void timerCheck();
+        void start();
+        void stop();
+        void loop();
 
         ~GuyTimer();
 };

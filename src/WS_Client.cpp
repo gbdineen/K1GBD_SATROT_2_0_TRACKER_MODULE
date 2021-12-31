@@ -58,32 +58,43 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
  //Serial.print("WS_Client::webSocketEvent: "); Serial.println(type);
 
  switch (type) {
-    case WStype_DISCONNECTED: // enum that read status this is used for debugging.
-      // Serial.print("WS Type ");
-      // Serial.print(type);
-      //Serial.println(": DISCONNECTED");
-      wsc.sendPing();
-      break;
+	case WStype_DISCONNECTED: // enum that read status this is used for debugging.
+		// Serial.print("WS Type ");
+		// Serial.print(type);
+		//Serial.println(": DISCONNECTED");
+		wsc.sendPing();
+		break;
     case WStype_CONNECTED:  // Check if a WebSocket client is connected or not
-      //Serial.print("WS Type "); Serial.println(type); 
-      //Serial.println(": CONNECTED");
-      sendTextToServer("WS_Client -> CONNECTED");
-      //wsc.sendTXT("wsc I'M CONNECTED"); 
-      break;
+		//Serial.print("WS Type "); Serial.println(type); 
+		//Serial.println(": CONNECTED");
+		sendTextToServer("WS_Client -> CONNECTED");
+		//wsc.sendTXT("wsc I'M CONNECTED"); 
+		break;
     case WStype_TEXT: // check responce from client
-      // Serial.print("WS Type "); Serial.println(type);
-      String pay = String((char*) payload);
-      Serial.println(pay);
-      StaticJsonDocument<200> obj;
-      DeserializationError error = deserializeJson(obj, payload);
-      String subject = obj["Subject"];
+		// Serial.print("WS Type "); Serial.println(type);
+		String pay = String((char*) payload);
+		//Serial.println(pay);
+		StaticJsonDocument<200> obj;
+		DeserializationError error = deserializeJson(obj, payload);
+		String subject = obj["Subject"];
+		String rollcontrol = obj["RollControl"];
       
-      if (subject == "clientconnected") {
-        pc->initBNO();
-      } else if (subject == "manualposition") {
-		    mc->moveServo(obj["Servo"],obj["Position"],obj["Direction"]);
-      }
-      break;
+		if (subject == "clientconnected")
+		{
+			pc->initBNO();
+		}
+		else if (subject == "manualposition")
+		{
+			if (rollcontrol=="false")
+			{
+				mc->moveServo(obj["Servo"],obj["Position"],obj["Direction"]);	
+			}
+			else
+			{
+				mc->moveDCMotor(obj["Direction"]);
+			}
+		}
+		break;
   }  
 }
 

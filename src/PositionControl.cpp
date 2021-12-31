@@ -72,6 +72,11 @@ void PositionControl::checkPosition()
     int posY = event.orientation.y;
     int posZ = -event.orientation.z;
 
+    uint8_t system, gyro, accel, mag;
+    system = gyro = accel = mag = 0;
+    bno.getCalibration(&system, &gyro, &accel, &mag);
+    systemCalibrationScore = system;
+
     Serial.print("\t");
     Serial.print("X: ");
     Serial.print(posX);
@@ -79,7 +84,10 @@ void PositionControl::checkPosition()
     Serial.print(posY);
     Serial.print("\tZ: ");
     Serial.print(posZ);
-    Serial.println("");
+    Serial.print("");
+    Serial.print("\t|\t");
+    Serial.print("Systemm: "); 
+    Serial.println(system);
 }
 
 /* OLD VERSION OF void PositionControl::getCalStatus(void)

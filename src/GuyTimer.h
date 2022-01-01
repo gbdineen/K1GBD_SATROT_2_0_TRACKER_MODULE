@@ -14,14 +14,14 @@ class GuyTimer
         unsigned long timerMillis;
         bool timerEnabled;
         std::function<void()> cb;
+        void timerCheck();
         
     public:
         GuyTimer(/* args */);
         GuyTimer(std::function<void(bool)> cb, unsigned long timerMills);
         
         void guyTimer(std::function<void()> fn, unsigned long pt);
-        void setTimer(unsigned long timerMillis);
-        void timerCheck();
+        void setMillis(unsigned long timerMillis);
         void start();
         void stop();
         void loop();

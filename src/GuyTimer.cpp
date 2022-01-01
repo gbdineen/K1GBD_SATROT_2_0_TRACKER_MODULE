@@ -13,10 +13,10 @@ GuyTimer::GuyTimer(std::function<void(bool)> cb, unsigned long timerMills)
 void GuyTimer::guyTimer(std::function<void()> fn, unsigned long ms)
 {
     this->cb = fn;
-    setTimer(ms);
+    setMillis(ms);
     timerEnabled=true; 
 }
-void GuyTimer::setTimer(unsigned long timerMillis)
+void GuyTimer::setMillis(unsigned long timerMillis)
 {
     this->timerMillis = timerMillis;
 }

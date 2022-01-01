@@ -12,8 +12,8 @@ WS_Client::WS_Client()
 WS_Client::WS_Client(MotorControl * mcPtr, PositionControl * pcPtr) 
 {
     std::cout << "WS_Client init\n";
-	  this->mc = mcPtr;
-    this->pc = pcPtr;
+		this->mc = mcPtr;
+    	this->pc = pcPtr;
 }
 
 void WS_Client::loop()
@@ -83,8 +83,9 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 		{
 			pc->initBNO();
 		}
-		else if (subject == "manualposition")
+		else if (subject == "manualcontrol")
 		{
+			pc->setControlMethod(MANUAL);
 			if (rollcontrol=="false")
 			{
 				mc->moveServo(obj["Servo"],obj["Position"],obj["Direction"]);	
@@ -93,6 +94,11 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 			{
 				mc->moveDCMotor(obj["Direction"]);
 			}
+		}
+		else if (subject == "autocontrol")
+		{
+			pc->setControlMethod(AUTO);
+			pc->updateKeps(obj["Azimuth"],obj["Elevation"]);
 		}
 		break;
   }  

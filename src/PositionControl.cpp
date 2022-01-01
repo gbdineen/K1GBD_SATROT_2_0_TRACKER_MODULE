@@ -9,6 +9,12 @@ PositionControl::PositionControl(GuyTimer * guyTmr)
     this->gt = guyTmr;
 }
 
+PositionControl::PositionControl(GuyTimer * guyTmr, MotorControl * mtrCtrl)
+{
+    this->gt = guyTmr;
+    this->mc = mtrCtrl;
+}
+
 void PositionControl::initBNO()
 { 
     if(!bno.begin())
@@ -36,7 +42,8 @@ void PositionControl::getCalStatus()
         bno.getCalibration(&system, &gyro, &accel, &mag);
         systemCalibrationScore = system;
 
-        if (systemCalibrationScore<3 && !bno.isFullyCalibrated())
+        if (systemCalibrationScore<3/* && !bno.isFullyCalibrated()*/)
+        // if (systemCalibrationScore<3 && mag<2)
         {
             Serial.print("Sys:");
             Serial.print(system);
@@ -50,17 +57,13 @@ void PositionControl::getCalStatus()
         }
         else 
         {
+            Serial.println("SYSTEM CALIBRATED");
             calibrationActive=false;
             systemCalibrated=true;
             gt->stop();
             auto CbPtr = std::bind(&PositionControl::checkPosition, this);
-            gt->guyTimer(CbPtr,50);
-            //checkPosition();
+            gt->guyTimer(CbPtr,1000);
         }
-    }
-    else 
-    {
-        
     }
 }
 
@@ -68,30 +71,68 @@ void PositionControl::checkPosition()
 {
     sensors_event_t event;
     bno.getEvent(&event);
-    int posX = event.orientation.x;
-    int posY = event.orientation.y;
-    int posZ = -event.orientation.z;
+    currAz = event.orientation.x;
+    currEl = -event.orientation.z;
+    currRoll = event.orientation.y;  
 
-    uint8_t system, gyro, accel, mag;
-    system = gyro = accel = mag = 0;
-    bno.getCalibration(&system, &gyro, &accel, &mag);
-    systemCalibrationScore = system;
+    if (controlMethod == AUTO)
+    {
+        if (currAz!=newAz)
+        {
+            auto CbPtr = std::bind(&PositionControl::trackAz, this);
+            GuyTimer * azTimer = new GuyTimer(CbPtr,50);
+            trackAz();
+        } else {
+            azTimer->stop();
+            
+        }
 
-    Serial.print("\t");
-    Serial.print("X: ");
-    Serial.print(posX);
-    Serial.print("\tY: ");
-    Serial.print(posY);
-    Serial.print("\tZ: ");
-    Serial.print(posZ);
-    Serial.print("");
-    Serial.print("\t|\t");
-    Serial.print("Systemm: "); 
-    Serial.println(system);
+        if (currEl!=newEl)
+        {
+            trackEl();
+        }
+    }
+    
+    // Serial.print("\t");
+    // Serial.print("currAz: ");
+    // Serial.print(currAz);
+    // Serial.print("\tcurrEl: ");
+    // Serial.print(currEl);
+    // Serial.print("\tcurrRoll: ");
+    // Serial.print(currRoll);
+    // Serial.print("");
+    // Serial.print("\t|\t");
+    // Serial.print("Systemm: "); 
+    // Serial.println(bno.isFullyCalibrated());   
+}
+
+void PositionControl::trackAz()
+{
+    Serial.println("Now tracking Azimuth");
+}
+
+void PositionControl::trackEl()
+{
+
+}
+
+void PositionControl::updateKeps(uint16_t az, uint16_t el)
+{
+    this->newAz = az;
+    this->newEl = el;
+}
+
+void PositionControl::setControlMethod(uint8_t cm)
+{
+    this->controlMethod = cm;
+}
+
+void PositionControl::loop() {
+
 }
 
 /* OLD VERSION OF void PositionControl::getCalStatus(void)
-void PositionControl::getCalStatus(void)
+void PositionControl::getCalStatus(void)x
 {
     unsigned long currentTime = millis();
     if (!systemCalibrated) {

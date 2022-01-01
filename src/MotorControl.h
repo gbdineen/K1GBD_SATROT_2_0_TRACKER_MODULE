@@ -40,7 +40,7 @@ class MotorControl
     public:
         MotorControl();
         void begin();
-        void moveServo(int spd);
+        //void moveServo(int spd);
         void moveServo(int svo, int spd, int dir);
         void moveDCMotor(int dir);
 };

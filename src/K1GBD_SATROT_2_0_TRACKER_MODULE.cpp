@@ -16,14 +16,14 @@
 #include "PositionControl.h"
 #include "GuyTimer.h"
 
-MotorControl motorCtrl; 
-MotorControl * motorCtrlPtr = &motorCtrl;
+MotorControl mtrCtrl; 
+MotorControl * mtrCtrlPtr = &mtrCtrl;
 GuyTimer gTmrPC;
 GuyTimer * gTmrPtr = &gTmrPC;
-PositionControl posCtrl(gTmrPtr);
+PositionControl posCtrl(gTmrPtr,mtrCtrlPtr);
 //PositionControl posCtrl;
 PositionControl * posCtrlPtr = &posCtrl;
-WS_Client wsClient(motorCtrlPtr, posCtrlPtr);
+WS_Client wsClient(mtrCtrlPtr, posCtrlPtr);
 
 void setup()
 {
@@ -32,11 +32,12 @@ void setup()
         ; // wait for serial port to connect. Needed for native USB
     }
     wsClient.begin();
-    motorCtrl.begin();
+    mtrCtrl.begin();
 }
 
 void loop()
 {
     wsClient.loop();
     gTmrPC.loop();
+    posCtrl.loop();
 }

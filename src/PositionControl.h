@@ -20,7 +20,7 @@ class PositionControl
         
         bool calibrationActive;
         bool systemCalibrated;
-        uint8_t controlMethod;
+        uint8_t controlMethod = AUTO;
         uint8_t systemCalibrationScore = 0;
         Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
         GuyTimer * gt;
@@ -30,8 +30,8 @@ class PositionControl
         uint16_t currAz;
         uint16_t currEl;
         uint16_t currRoll;
-        uint16_t newAz;
-        uint16_t newEl;
+        uint16_t targAz;
+        uint16_t targEl;
         uint16_t prevAz;
         uint16_t prevEl;
 

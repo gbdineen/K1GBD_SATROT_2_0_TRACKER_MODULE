@@ -85,7 +85,7 @@ void PositionControl::getCalStatus()
             mc->moveDCMotor(FULL_STOP);
             mc->moveServo(0,0,FULL_STOP);
             mc->moveServo(1,0,FULL_STOP);
-            newAz = 10;
+            targAz = 10;
             delay(2000);  // give the antenna a moment to settle
             
             auto CbPtr = std::bind(&PositionControl::checkPosition, this);
@@ -106,85 +106,49 @@ void PositionControl::checkPosition()
     currEl = -event.orientation.z;
     currRoll = event.orientation.y; 
 
-    Serial.print("currAz: "); Serial.print(currAz); Serial.print("\tnewAz: "); Serial.println(newAz); 
+    Serial.print("currAz: "); Serial.print(currAz); Serial.print("\t|\ttargAz: "); Serial.print(targAz);
+        Serial.print("\t|\tprevAz: "); Serial.println(prevAz); 
 
     // if (controlMethod == AUTO)
     //  {
-        if (currAz!=newAz  && !trackingAz)
+        if (targAz!=prevAz  && !trackingAz)
         {
-            // if (!trackingAz)
-            // {
-                // trackingAz=true;
-                // gt->setMillis(50);
-                // mc->moveServo(0,9,CLOCKWISE);
-                //azTimer.start();
-                //trackAz();
-            //}
-
             trackAz();
             gt->setMillis(50);
         }
-        // else
-        // {
-        //     trackingAz=false;
-        //     mc->moveServo(0,0,FULL_STOP);
-        //     //gt->stop();
-        //     //delay(5000);
-        //     gt->setMillis(2000);
-        //     newAz=currAz;
-        // }
-
-        // if (currEl!=newEl)
-        // {
-        //     trackEl();
-        // }
-    // }
-    
-    // Serial.print("\t");    
-    // Serial.print("currAz: ");
-    // Serial.print(currAz);
-    // Serial.print("\tcurrEl: ");
-    // Serial.print(currEl);
-    // Serial.print("\tcurrRoll: ");
-    // Serial.print(currRoll);
-    // Serial.print("");
-    // Serial.print("\t|\t");
-    // Serial.print("Systemm: "); 
-    // Serial.println(bno.isFullyCalibrated());
-
+    //}
 }
+
 
 void PositionControl::trackAz()
 {
     Serial.println("Now tracking Azimuth");
     if (!trackingAz)
     {
+        // if (/* condition */)
+        // {
+        //     /* code */
+        // }
+        
+
         trackingAz=true;
         azTimer.start();
         mc->moveServo(0,9,CLOCKWISE);
     }
 
-    if (currAz>(newAz-2) && currAz<(newAz+2))
+    //if (currAz>(targAz-1) && currAz<(targAz+1))
+    if (currAz==targAz)
     {
-        newAz=currAz;
+        //gt->setMillis(1000);
+        gt->stop();
+        prevAz=currAz;
         azTimer.stop();
         mc->moveServo(0,0,FULL_STOP);
-        //gt->setMillis(1000);
         trackingAz=false;
-       
+        gt->start(1000);
+        
     }
 
-    // if (trackingAz)
-    // {
-    //     //Serial.println("===================>>>>> CHECK TWO");
-    //     //auto tazPtr = std::bind(&PositionControl::trackAz, this);
-    //     //azTimer.guyTimer(tazPtr,50);
-    //     azTimer.start();
-    // }
-    // else
-    // {
-    //     azTimer.stop();
-    // }
     
 }
 
@@ -195,8 +159,8 @@ void PositionControl::trackEl()
 
 void PositionControl::updateKeps(uint16_t az, uint16_t el)
 {
-    this->newAz = az;
-    this->newEl = el;
+    this->targAz = az;
+    this->targEl = el;
     Serial.print("updating keps");
 }
 

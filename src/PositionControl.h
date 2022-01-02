@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
@@ -23,16 +24,18 @@ class PositionControl
         uint8_t systemCalibrationScore = 0;
         Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
         GuyTimer * gt;
+        GuyTimer azTimer;
+        GuyTimer * elTimer;
         MotorControl * mc;
         uint16_t currAz;
         uint16_t currEl;
         uint16_t currRoll;
-
         uint16_t newAz;
         uint16_t newEl;
-
         uint16_t prevAz;
         uint16_t prevEl;
+
+        bool trackingAz;
 
 
     public:

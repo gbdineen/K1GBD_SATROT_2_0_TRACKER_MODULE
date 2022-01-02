@@ -3,22 +3,46 @@
 
 GuyTimer::GuyTimer(/* args */)
 {
+    std::cout << "GuyTimer init" << std::endl;
 }
 
-GuyTimer::GuyTimer(std::function<void(bool)> cb, unsigned long timerMills)
+GuyTimer::GuyTimer(std::function<void()> cb, unsigned long pt)
 {
-    std::cout << "GuyTime init" << std::endl;
+    std::cout << "GuyTimer init" << std::endl;
 }
 
-void GuyTimer::guyTimer(std::function<void()> fn, unsigned long ms)
+// bool GuyTimer::guyTimer(std::function<void()> cb)
+// {
+//     this->cb = cb;
+    
+//     return true;
+// }
+
+bool GuyTimer::guyTimer(std::function<void()> cb, bool start)
 {
-    this->cb = fn;
+    this->cb = cb;
+    timerEnabled=start; 
+
+    return true;
+}
+
+bool GuyTimer::guyTimer(std::function<void()> cb, unsigned long ms, bool start)
+{
+    this->cb = cb;
     setMillis(ms);
-    timerEnabled=true; 
+    timerEnabled=start; 
+
+    return true;
 }
+
 void GuyTimer::setMillis(unsigned long timerMillis)
 {
     this->timerMillis = timerMillis;
+}
+
+void GuyTimer::setCallback(std::function<void()> cb) 
+{
+    
 }
 
 void GuyTimer::timerCheck()
@@ -31,8 +55,9 @@ void GuyTimer::timerCheck()
     }
 }
 
-void GuyTimer::start()
+void GuyTimer::start(unsigned long ms)
 {
+    timerMillis=ms;
     if (!timerEnabled)
     {
         timerEnabled=true;

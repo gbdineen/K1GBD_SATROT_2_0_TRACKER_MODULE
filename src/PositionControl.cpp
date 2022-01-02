@@ -13,6 +13,8 @@ PositionControl::PositionControl(GuyTimer * guyTmr, MotorControl * mtrCtrl)
 {
     this->gt = guyTmr;
     this->mc = mtrCtrl;
+    auto tazPtr = std::bind(&PositionControl::trackAz, this);
+    azTimer.guyTimer(tazPtr,false);
 }
 
 void PositionControl::initBNO()
@@ -28,9 +30,15 @@ void PositionControl::initBNO()
         Serial.println("beginBNO");
         bno.setExtCrystalUse(true);
         auto CbPtr = std::bind(&PositionControl::getCalStatus, this);
-        gt->guyTimer(CbPtr,50);
+        gt->guyTimer(CbPtr);
     }
     
+    // bno.begin();
+    // Serial.println("beginBNO");
+    // bno.setExtCrystalUse(true);
+
+    // auto CbPtr = std::bind(&PositionControl::checkPosition, this);
+    // gt->guyTimer(CbPtr,50);
 }
 
 void PositionControl::getCalStatus()
@@ -42,7 +50,7 @@ void PositionControl::getCalStatus()
         bno.getCalibration(&system, &gyro, &accel, &mag);
         systemCalibrationScore = system;
 
-        if (systemCalibrationScore<3/* && !bno.isFullyCalibrated()*/)
+        if (systemCalibrationScore<1/* && !bno.isFullyCalibrated()*/)
         // if (systemCalibrationScore<3 && mag<2)
         {
             Serial.print("Sys:");
@@ -57,41 +65,69 @@ void PositionControl::getCalStatus()
         }
         else 
         {
+            // if (!systemCalibrated)
+            // {
             Serial.println("SYSTEM CALIBRATED");
+
+            setControlMethod(AUTO); // temp for testing. should happen explicitly from user input
+
             calibrationActive=false;
             systemCalibrated=true;
+
             gt->stop();
+            mc->moveDCMotor(FULL_STOP);
+            mc->moveServo(0,0,FULL_STOP);
+            mc->moveServo(1,0,FULL_STOP);
+            newAz = 170;
+            delay(2000);  // give the antenna a moment to settle
+            
             auto CbPtr = std::bind(&PositionControl::checkPosition, this);
-            gt->guyTimer(CbPtr,1000);
+            gt->guyTimer(CbPtr,1000,true);
+                /* code */
+            //}
+            
         }
     }
 }
 
 void PositionControl::checkPosition()
 {
+    //Serial.print("controlMethod: "); Serial.println(controlMethod);
     sensors_event_t event;
     bno.getEvent(&event);
     currAz = event.orientation.x;
     currEl = -event.orientation.z;
-    currRoll = event.orientation.y;  
+    currRoll = event.orientation.y; 
 
-    if (controlMethod == AUTO)
-    {
-        if (currAz!=newAz)
+    Serial.print("currAz: "); Serial.print(currAz); Serial.print("\tnewAz: "); Serial.println(newAz); 
+
+    // if (controlMethod == AUTO)
+    //  {
+        if (currAz!=newAz  && !trackingAz)
         {
-            auto CbPtr = std::bind(&PositionControl::trackAz, this);
-            GuyTimer * azTimer = new GuyTimer(CbPtr,50);
-            trackAz();
-        } else {
-            azTimer->stop();
+            // if (!trackingAz)
+            // {
+                trackingAz=true;
+                gt->setMillis(50);
+                mc->moveServo(0,9,CLOCKWISE);
+                //azTimer.start();
+                //trackAz();
+            //}
             
+        } else {
+            trackingAz=false;
+            mc->moveServo(0,0,FULL_STOP);
+            //gt->stop();
+            //delay(5000);
+            gt->setMillis(2000);
+            newAz=currAz;
         }
 
-        if (currEl!=newEl)
-        {
-            trackEl();
-        }
-    }
+        // if (currEl!=newEl)
+        // {
+        //     trackEl();
+        // }
+    // }
     
     // Serial.print("\t");
     // Serial.print("currAz: ");
@@ -103,12 +139,24 @@ void PositionControl::checkPosition()
     // Serial.print("");
     // Serial.print("\t|\t");
     // Serial.print("Systemm: "); 
-    // Serial.println(bno.isFullyCalibrated());   
+    // Serial.println(bno.isFullyCalibrated());
 }
 
 void PositionControl::trackAz()
 {
     Serial.println("Now tracking Azimuth");
+    // if (trackingAz)
+    // {
+    //     //Serial.println("===================>>>>> CHECK TWO");
+    //     //auto tazPtr = std::bind(&PositionControl::trackAz, this);
+    //     //azTimer.guyTimer(tazPtr,50);
+    //     azTimer.start();
+    // }
+    // else
+    // {
+    //     azTimer.stop();
+    // }
+    
 }
 
 void PositionControl::trackEl()
@@ -120,6 +168,7 @@ void PositionControl::updateKeps(uint16_t az, uint16_t el)
 {
     this->newAz = az;
     this->newEl = el;
+    Serial.print("updating keps");
 }
 
 void PositionControl::setControlMethod(uint8_t cm)
@@ -128,7 +177,7 @@ void PositionControl::setControlMethod(uint8_t cm)
 }
 
 void PositionControl::loop() {
-
+    azTimer.loop();
 }
 
 /* OLD VERSION OF void PositionControl::getCalStatus(void)

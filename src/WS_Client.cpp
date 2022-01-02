@@ -98,8 +98,12 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 		else if (subject == "autocontrol")
 		{
 			pc->setControlMethod(AUTO);
-			pc->updateKeps(obj["Azimuth"],obj["Elevation"]);
+			if (obj["Azimuth"] || obj["Elevation"])
+			{
+				pc->updateKeps(obj["Azimuth"],obj["Elevation"]);
+			}
 		}
+		
 		break;
   }  
 }

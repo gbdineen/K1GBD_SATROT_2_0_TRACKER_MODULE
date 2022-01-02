@@ -18,11 +18,15 @@ class GuyTimer
         
     public:
         GuyTimer(/* args */);
-        GuyTimer(std::function<void(bool)> cb, unsigned long timerMills);
+        GuyTimer(std::function<void()> cb, unsigned long pt);
         
-        void guyTimer(std::function<void()> fn, unsigned long pt);
+        //bool guyTimer(std::function<void()> cb);
+        bool guyTimer(std::function<void()> cb, bool start);
+        bool guyTimer(std::function<void()> cb, unsigned long ms=50, bool start=true);
+
         void setMillis(unsigned long timerMillis);
-        void start();
+        void setCallback(std::function<void()> cb);
+        void start(unsigned long ms=50);
         void stop();
         void loop();
 

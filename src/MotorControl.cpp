@@ -16,6 +16,8 @@ void MotorControl::begin()
    
     pwm.begin();
     pwm.setPWMFreq(PWM_FREQUENCY);  // Analog servos run at ~50 Hz updates
+    moveServo(0,0,FULL_STOP);
+    moveServo(1,0,FULL_STOP);
     //delay(50);
 }
 
@@ -37,7 +39,7 @@ void MotorControl::begin()
  */
 void MotorControl::moveServo(int svo, int spd, int dir)
 {
-    std::cout << "Incoming speed: " << spd << "\n";
+   // std::cout << "Incoming speed: " << spd << "\n";
     int pw;
     switch (dir) {
         case CLOCKWISE:

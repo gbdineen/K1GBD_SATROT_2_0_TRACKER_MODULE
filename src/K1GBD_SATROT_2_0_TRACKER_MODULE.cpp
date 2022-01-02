@@ -4,6 +4,7 @@
 #include <Adafruit_MotorShield.h>
 #include "Adafruit_PWMServoDriver.h"
 #include <iostream>
+#include <memory>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>

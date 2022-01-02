@@ -29,8 +29,14 @@ void PositionControl::initBNO()
     {
         Serial.println("beginBNO");
         bno.setExtCrystalUse(true);
+
+        systemCalibrationScore=2;
+
         auto CbPtr = std::bind(&PositionControl::getCalStatus, this);
         gt->guyTimer(CbPtr);
+
+
+
     }
     
     // bno.begin();
@@ -48,7 +54,8 @@ void PositionControl::getCalStatus()
         uint8_t system, gyro, accel, mag;
         system = gyro = accel = mag = 0;
         bno.getCalibration(&system, &gyro, &accel, &mag);
-        systemCalibrationScore = system;
+        
+        //systemCalibrationScore = system;
 
         if (systemCalibrationScore<1/* && !bno.isFullyCalibrated()*/)
         // if (systemCalibrationScore<3 && mag<2)
@@ -78,7 +85,7 @@ void PositionControl::getCalStatus()
             mc->moveDCMotor(FULL_STOP);
             mc->moveServo(0,0,FULL_STOP);
             mc->moveServo(1,0,FULL_STOP);
-            newAz = 170;
+            newAz = 10;
             delay(2000);  // give the antenna a moment to settle
             
             auto CbPtr = std::bind(&PositionControl::checkPosition, this);
@@ -107,21 +114,25 @@ void PositionControl::checkPosition()
         {
             // if (!trackingAz)
             // {
-                trackingAz=true;
-                gt->setMillis(50);
-                mc->moveServo(0,9,CLOCKWISE);
+                // trackingAz=true;
+                // gt->setMillis(50);
+                // mc->moveServo(0,9,CLOCKWISE);
                 //azTimer.start();
                 //trackAz();
             //}
-            
-        } else {
-            trackingAz=false;
-            mc->moveServo(0,0,FULL_STOP);
-            //gt->stop();
-            //delay(5000);
-            gt->setMillis(2000);
-            newAz=currAz;
+
+            trackAz();
+            gt->setMillis(50);
         }
+        // else
+        // {
+        //     trackingAz=false;
+        //     mc->moveServo(0,0,FULL_STOP);
+        //     //gt->stop();
+        //     //delay(5000);
+        //     gt->setMillis(2000);
+        //     newAz=currAz;
+        // }
 
         // if (currEl!=newEl)
         // {
@@ -129,7 +140,7 @@ void PositionControl::checkPosition()
         // }
     // }
     
-    // Serial.print("\t");
+    // Serial.print("\t");    
     // Serial.print("currAz: ");
     // Serial.print(currAz);
     // Serial.print("\tcurrEl: ");
@@ -140,11 +151,29 @@ void PositionControl::checkPosition()
     // Serial.print("\t|\t");
     // Serial.print("Systemm: "); 
     // Serial.println(bno.isFullyCalibrated());
+
 }
 
 void PositionControl::trackAz()
 {
     Serial.println("Now tracking Azimuth");
+    if (!trackingAz)
+    {
+        trackingAz=true;
+        azTimer.start();
+        mc->moveServo(0,9,CLOCKWISE);
+    }
+
+    if (currAz>(newAz-2) && currAz<(newAz+2))
+    {
+        newAz=currAz;
+        azTimer.stop();
+        mc->moveServo(0,0,FULL_STOP);
+        //gt->setMillis(1000);
+        trackingAz=false;
+       
+    }
+
     // if (trackingAz)
     // {
     //     //Serial.println("===================>>>>> CHECK TWO");

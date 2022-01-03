@@ -103,6 +103,10 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 				pc->updateKeps(obj["Azimuth"],obj["Elevation"]);
 			}
 		}
+		else if (subject=="controlmethod")
+		{
+			pc->setControlMethod(obj["ControlMethod"]);
+		}
 		
 		break;
   }  

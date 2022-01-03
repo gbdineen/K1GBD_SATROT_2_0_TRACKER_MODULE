@@ -26,6 +26,7 @@ class GuyTimer
 
         void setMillis(unsigned long timerMillis);
         void setCallback(std::function<void()> cb);
+        
         void start(unsigned long ms=50);
         void stop();
         void loop();

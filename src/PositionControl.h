@@ -47,6 +47,7 @@ class PositionControl
         void trackEl();
         void updateKeps(uint16_t az, uint16_t el);
         void setControlMethod(uint8_t cm);
+        uint8_t direction(uint16_t targ, uint16_t prev);
         void loop();
         
         PositionControl(/* args */);

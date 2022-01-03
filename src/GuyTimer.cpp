@@ -18,6 +18,7 @@ GuyTimer::GuyTimer(std::function<void()> cb, unsigned long pt)
 //     return true;
 // }
 
+
 bool GuyTimer::guyTimer(std::function<void()> cb, bool start)
 {
     this->cb = cb;
@@ -63,6 +64,7 @@ void GuyTimer::start(unsigned long ms)
         timerEnabled=true;
     }
 }
+
 
 void GuyTimer::stop()
 {

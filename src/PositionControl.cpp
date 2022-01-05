@@ -29,13 +29,9 @@ void PositionControl::initBNO()
     {
         Serial.println("beginBNO");
         bno.setExtCrystalUse(true);
-
-        //systemCalibrationScore=2;
-
+        
         auto CbPtr = std::bind(&PositionControl::getCalStatus, this);
         gt->guyTimer(CbPtr);
-
-
 
     }
 }
@@ -103,34 +99,44 @@ void PositionControl::checkPosition()
     currEl = -event.orientation.z;
     currRoll = event.orientation.y;
 
-    Serial.print("currAz:");
-    Serial.print(currAz);
-    Serial.print("\t|\tcurrEl:");
-    Serial.print(currEl);
-    Serial.print("\t|\tcurrRoll:");
-    Serial.println(currRoll);
+    // Serial.print("currAz:");
+    // Serial.print(currAz);
+    // Serial.print("\t|\tcurrEl:");
+    // Serial.print(currEl);
+    // Serial.print("\t|\tcurrRoll:");
+    // Serial.println(currRoll);
 
-    if (controlMethod == AUTO)
-     {
+    //if (controlMethod == AUTO)
+     ///{
         if (targAz!=prevAz  && !trackingAz)
         {
             trackAz();
             gt->setMillis(50);
         }
-    }
+    //}
 }
 
 
 void PositionControl::trackAz()
 {
-    Serial.println("Now tracking Azimuth");
+    Serial.println("========= Tracking Azimuth ===========================");
     if (!trackingAz)
     {
         uint8_t dir = direction(targAz,prevAz);
         trackingAz=true;
         azTimer.start();
-        mc->moveServo(0,8,dir);
+        mc->moveServo(0,9,dir);
+        Serial.print("Direction:");
+        Serial.print(dir);
     }
+    
+    Serial.print("currAz:");
+    Serial.print(currAz);
+    Serial.print("\t|\ttargAz:");
+    Serial.print(targAz);
+    Serial.print("\t|\tprevAz:");
+    Serial.println(prevAz);
+    
 
     //if (currAz>(targAz-1) && currAz<(targAz+1))
     if (currAz == targAz)
@@ -166,6 +172,11 @@ void PositionControl::setControlMethod(uint8_t cm)
 
 uint8_t PositionControl::direction(uint16_t targ, uint16_t prev)
 {
+    
+    if (!prev)
+    {
+        prev=currAz;
+    }
     if (targ>prev)
     {
         return 0; // CLOCKWISE

@@ -41,7 +41,8 @@ class PositionControl
     public:
         
         void initBNO();
-        void getCalStatus();
+        void autoCalibration();
+        uint8_t getCalStatus();
         void checkPosition();
         void trackAz();
         void trackEl();

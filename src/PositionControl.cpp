@@ -36,7 +36,15 @@ void PositionControl::initBNO()
     }
 }
 
-void PositionControl::getCalStatus()
+void PositionControl::autoCalibration()
+{
+
+
+}
+
+
+
+uint8_t PositionControl::getCalStatus()
 {
     if (!systemCalibrated)
     {
@@ -84,6 +92,7 @@ void PositionControl::getCalStatus()
             
         }
     }
+    return this->systemCalibrationScore;
 }
 
 void PositionControl::checkPosition()

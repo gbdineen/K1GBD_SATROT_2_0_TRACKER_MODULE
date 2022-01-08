@@ -24,7 +24,7 @@ class GuyTimer
         bool guyTimer(std::function<void()> cb, bool start);
         bool guyTimer(std::function<void()> cb, unsigned long ms=50, bool start=true);
 
-        void setMillis(unsigned long timerMillis);
+        bool setMillis(unsigned long timerMillis);
         void setCallback(std::function<void()> cb);
         
         void start(unsigned long ms=50);

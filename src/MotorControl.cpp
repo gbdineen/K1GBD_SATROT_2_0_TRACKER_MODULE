@@ -4,7 +4,7 @@
 
 MotorControl::MotorControl()
 {
-    std::cout << "MotorControl init\n";
+    //std::cout << "MotorControl init\n";
 }
 
 void MotorControl::begin()
@@ -73,11 +73,11 @@ void MotorControl::moveDCMotor(int dir)
     switch (dir)
     {
         case CLOCKWISE:
-        myMotor->run(FORWARD);
+        myMotor->run(BACKWARD);
         break;
 
         case COUNTER_CLOCKWISE:
-        myMotor->run(BACKWARD);
+        myMotor->run(FORWARD);
         break;
 
         case FULL_STOP:

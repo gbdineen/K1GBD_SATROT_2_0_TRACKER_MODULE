@@ -10,6 +10,8 @@
 #define CLOCKWISE 0
 #define COUNTER_CLOCKWISE 1
 #define FULL_STOP 2
+#define AZ_SERVO 0
+#define EL_SERVO 1
 
 class MotorControl
 {

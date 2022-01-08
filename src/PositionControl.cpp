@@ -93,7 +93,8 @@ uint8_t PositionControl::calibrateSystem()
         /* Display system callibration scores while we move the antenna this way and that
         to reach a score of 3 for all but mag which we will accept as 2 
         */
-        if (system<3 || gyro<3 || accel<3 || mag<2)
+        //if (system<3 || gyro<3 || accel<3 || mag<2)
+        if (accel<3)
         {
             Serial.print("Sys:");
             Serial.print(system);
@@ -162,8 +163,8 @@ void PositionControl::parkAntenna(int azPos, int elPos)
     uint16_t cEl = this->currEl;
     uint16_t cRoll = this->currRoll;
     
-    targAz=355;
-    targEl=1;
+    targAz=0;
+    targEl=0;
     targRoll=45;
     
     // int dirAz = servoDirection(355,cAz);
@@ -233,33 +234,33 @@ void PositionControl::checkPosition()
 
 void PositionControl::trackAz()
 {
-    //Serial.println("========= Tracking Azimuth ===========================");
+    Serial.println("========= Tracking Azimuth ===========================");
     if (!trackingAz)
     {
         uint8_t dir = servoDirection(targAz,prevAz);
         trackingAz=true;
         azTimer.start();
-        mc->moveServo(0,9,dir);
-        // Serial.print("Direction:");
-        // Serial.print(dir);
+        mc->moveServo(AZ_SERVO,9,dir);
+        Serial.print("Direction:");
+        Serial.print(dir);
     }
     
-    // Serial.print("currAz:");
-    // Serial.print(currAz);
-    // Serial.print("\t|\ttargAz:");
-    // Serial.print(targAz);
-    // Serial.print("\t|\tprevAz:");
-    // Serial.println(prevAz);
+    Serial.print("currAz:");
+    Serial.print(currAz);
+    Serial.print("\t|\ttargAz:");
+    Serial.print(targAz);
+    Serial.print("\t|\tprevAz:");
+    Serial.println(prevAz);
     
 
     //if (currAz>(targAz-1) && currAz<(targAz+1))
     if (currAz == targAz)
     {
         //gt->setMillis(1000);
-        mc->moveServo(0,0,FULL_STOP);
-        //gt->stop();
+        mc->moveServo(AZ_SERVO,0,FULL_STOP);
+        gt->stop();
         //delay(3000);
-        //gt->start(1000);
+        gt->start(1000);
         trackingAz=false;
         azTimer.stop();
      }
@@ -271,7 +272,7 @@ void PositionControl::trackEl()
     Serial.println("========= Tracking Elevation ===========================");
     if (!trackingEl)
     {
-        uint8_t dir = servoDirection(targEl,prevEl);
+        uint8_t dir = servoDirection(targEl,prevEl,true);
         trackingEl=true;
         elTimer.start();
         mc->moveServo(EL_SERVO,9,dir);
@@ -291,9 +292,9 @@ void PositionControl::trackEl()
     {
         //gt->setMillis(1000);
         mc->moveServo(EL_SERVO,0,FULL_STOP);
-        //gt->stop();
+        gt->stop();
         //delay(3000);
-        //gt->start(1000);
+        gt->start(1000);
         trackingEl=false;
         elTimer.stop();
      }
@@ -302,7 +303,7 @@ void PositionControl::trackEl()
 
 void PositionControl::trackRoll()
 {
-    //Serial.println("========= Tracking Roll ===========================");
+    Serial.println("========= Tracking Roll ===========================");
     if (!trackingRoll)
     {
         uint8_t dir = servoDirection(targRoll,prevRoll);
@@ -311,12 +312,12 @@ void PositionControl::trackRoll()
         mc->moveDCMotor(dir);
         Serial.print("Roll direction: "); Serial.println(dir);
     } 
-    // Serial.print("currRoll:");
-    // Serial.print(currRoll);
-    // Serial.print("\t|\ttargRoll:");
-    // Serial.print(targRoll);
-    // Serial.print("\t|\tprevRoll:");
-    // Serial.println(prevRoll);
+    Serial.print("currRoll:");
+    Serial.print(currRoll);
+    Serial.print("\t|\ttargRoll:");
+    Serial.print(targRoll);
+    Serial.print("\t|\tprevRoll:");
+    Serial.println(prevRoll);
     if (currRoll == targRoll)
     {
         //gt->setMillis(1000);
@@ -352,24 +353,47 @@ uint8_t PositionControl::servoDirection(int targ, int prev, bool el)
     // }
     if (targ>prev)
     {
-        if (!el) {
-            return 0; // CLOCKWISE
+        
+        if (el)
+        {
+            // return 1; // COUNTER_CLOCKWISE
         }
         else
         {
-            return 1;
-        }   
+            return 0; // CLOCKWISE
+        }
+        
+        // if (!az) {
+        //     return 0; // CLOCKWISE
+        //      // return 1; // COUNTER_CLOCKWISE
+        // }
+        // else
+        // {
+        //     return 1; // COUNTER_CLOCKWISE
+        // }   
     }
     else if (targ<prev)
     {  
         
-        if (!el) {
-            return 1; // COUNTER_CLOCKWISE
+        if (el)
+        {
+            return 0; // CLOCKWISE
         }
         else
         {
-            return 0;
+            return 1; // COUNTER_CLOCKWISE
         }
+
+        //return 1; // COUNTER_CLOCKWISE
+        
+        // if (!az) {
+        //     //return 0; // CLOCKWISE
+        //     return 1; // COUNTER_CLOCKWISE
+        // }
+        // else
+        // {
+        //     return 0; // CLOCKWISE
+        // }
     }
     else
     {

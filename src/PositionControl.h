@@ -47,6 +47,7 @@ class PositionControl
         GuyTimer rollTimer;
         MotorControl * mc;
         std::function<void()> calibrationCallback;
+        std::function<void(int az, int el, int roll)> targetsCallback;
 
         uint16_t currAz;
         int currEl;
@@ -88,6 +89,8 @@ class PositionControl
         uint8_t servoDirection(int targ, int prev, bool el=false);
         uint8_t motorDirection(uint16_t targ, uint16_t prev);
         void setCalibrationCallback(std::function<void()> cb);
+        void setTargetsCallback(std::function<void(int az, int el, int roll)> cb);
+        void setTargets();
         void loop();
         
         PositionControl(/* args */);

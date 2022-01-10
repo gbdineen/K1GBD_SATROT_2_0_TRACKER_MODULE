@@ -132,7 +132,7 @@ uint8_t PositionControl::calibrateSystem()
             setSensorOffsets(offsets); // Set the calibration data into the BNO sensor to have and to hold until a power cut dues us part
             */
 
-            setControlMethod(AUTO); // temp for testing. should happen explicitly from user input
+            //setControlMethod(AUTO); // temp for testing. should happen explicitly from user input
 
             calibrationActive=false;
             systemCalibrated=true;
@@ -349,11 +349,6 @@ void PositionControl::parkAntenna(int azPos, int elPos)
 {
     
     
-    
-    uint16_t cAz = this->currAz;
-    uint16_t cEl = this->currEl;
-    uint16_t cRoll = this->currRoll;
-    
     targAz=20;
     targEl=5;
     targRoll=45;
@@ -372,8 +367,12 @@ void PositionControl::antennaStationaryCheck()
 {
     if (!trackingAz && !trackingEl && !trackingRoll)
     {
-        gt->start(1000);
-        //return true;
+        setTargets();
+        if (controlMethod!=UDP)
+        {
+            gt->start(1000);
+            //return true;
+        }
     }
     else
     {
@@ -390,6 +389,14 @@ void PositionControl::updateKeps(int az, int el)
 }
 
 void PositionControl::getCurrentTargets(){
+
+}
+
+void PositionControl::setTargets()
+{
+
+    Serial.print("\n----- [Setting Targets 1] -----]\n");
+    targetsCallback(prevAz,prevEl,prevRoll);
 
 }
 
@@ -477,6 +484,11 @@ uint8_t PositionControl::motorDirection(uint16_t targ, uint16_t prev)
 void PositionControl::setCalibrationCallback(std::function<void()> cb)
 {
     this->calibrationCallback=cb;
+}
+
+void PositionControl::setTargetsCallback(std::function<void(int az, int el, int roll)> cb)
+{
+    this->targetsCallback=cb;
 }
 
 

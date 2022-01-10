@@ -30,7 +30,8 @@ class WS_Client
         WS_Client(MotorControl * mcPtr, PositionControl * pcPtr);
         bool begin();
         void sendTextToServer(String s);
-        void confirmCalibration();      
+        void confirmCalibration();
+        void setTargets(int az, int el, int roll);     
         void loop();
         ~WS_Client();
 

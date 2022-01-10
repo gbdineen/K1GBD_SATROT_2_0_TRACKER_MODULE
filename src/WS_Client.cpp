@@ -17,6 +17,9 @@ WS_Client::WS_Client(MotorControl * mcPtr, PositionControl * pcPtr)
 	auto CbPtr = std::bind(&WS_Client::confirmCalibration, this);
 	pc->setCalibrationCallback(CbPtr);
 
+	auto TgPtr = std::bind(&WS_Client::setTargets, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+	pc->setTargetsCallback(TgPtr);
+
 }
 
 bool WS_Client::begin()
@@ -50,9 +53,22 @@ void WS_Client::confirmCalibration()
 	StaticJsonDocument<200> obj;
 	String str;
 	obj["Subject"] = "system-calibration-status";
-	obj["Calibraton-Status"] = 1;
+	obj["Calibration-Status"] = 1;
 	serializeJson(obj, str);
 	sendTextToServer(str);
+}
+
+void WS_Client::setTargets(int az, int el, int roll)
+{
+	Serial.print("\n----- [Setting Targets 2] -----]\n");
+	StaticJsonDocument<200> tobj;
+	String tstr;
+	tobj["Subject"] = "previous-targets";
+	tobj["Azimuth"] = az;
+	tobj["Elevation"] = el;
+	tobj["Roll"] = roll;
+	serializeJson(tobj, tstr);
+	sendTextToServer(tstr);
 }
 
 
@@ -121,7 +137,7 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 			}
 			else if (subject == "udpcontrol")
 			{
-				pc->setControlMethod(AUTO);
+				pc->setControlMethod(UDP);
 				if (obj["Azimuth"] || obj["Elevation"])
 				{
 					pc->updateKeps(obj["Azimuth"],obj["Elevation"]);

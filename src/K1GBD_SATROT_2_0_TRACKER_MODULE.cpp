@@ -21,10 +21,11 @@ MotorControl mtrCtrl;
 MotorControl * mtrCtrlPtr = &mtrCtrl;
 GuyTimer gTmrPC;
 GuyTimer * gTmrPtr = &gTmrPC;
-PositionControl posCtrl(gTmrPtr,mtrCtrlPtr);
-//PositionControl posCtrl;
+PositionControl posCtrl(gTmrPtr,mtrCtrlPtr);//PositionControl posCtrl;
 PositionControl * posCtrlPtr = &posCtrl;
 WS_Client wsClient(mtrCtrlPtr, posCtrlPtr);
+WS_Client * wsPtr = &wsClient;
+
 
 void setup()
 {
@@ -34,6 +35,7 @@ void setup()
     }
     wsClient.begin();
     mtrCtrl.begin();
+
 }
 
 void loop()

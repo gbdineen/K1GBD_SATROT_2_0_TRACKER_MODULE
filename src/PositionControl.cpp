@@ -13,6 +13,7 @@ PositionControl::PositionControl(GuyTimer * guyTmr, MotorControl * mtrCtrl)
 {
     this->gt = guyTmr;
     this->mc = mtrCtrl;
+    //this->ws = ws;
     
     auto tazPtr = std::bind(&PositionControl::trackAz, this);
     azTimer.guyTimer(tazPtr,false);
@@ -24,6 +25,7 @@ PositionControl::PositionControl(GuyTimer * guyTmr, MotorControl * mtrCtrl)
     rollTimer.guyTimer(rollPtr,false);
 
 }
+
 
 void PositionControl::initBNO()
 { 
@@ -51,7 +53,7 @@ void PositionControl::initBNO()
         }
         */
 
-       auto CbPtr = std::bind(&PositionControl::calibrateSystem, this);
+        auto CbPtr = std::bind(&PositionControl::calibrateSystem, this);
         gt->guyTimer(CbPtr);
 
     }
@@ -94,7 +96,7 @@ uint8_t PositionControl::calibrateSystem()
         to reach a score of 3 for all but mag which we will accept as 2 
         */
         //if (system<3 || gyro<3 || accel<3 || mag<2)
-        if (accel<3)
+        if (accel<3 || mag<1)
         {
             Serial.print("Sys:");
             Serial.print(system);
@@ -103,7 +105,7 @@ uint8_t PositionControl::calibrateSystem()
             Serial.print(" A:");
             Serial.print(accel);
             Serial.print(" M:");
-                    Serial.print(mag);
+            Serial.print(mag);
             Serial.println("");
         }
         else 
@@ -119,6 +121,8 @@ uint8_t PositionControl::calibrateSystem()
             Serial.print(" M:");
             Serial.print(mag);
             Serial.println("");
+            
+            this->calibrationCallback(); // Send notification to WS_Client that calibration has been completed and we're ready to start taking UDP packets
 
             gt->stop();  // Stop the timer from checking for any further calibration
             
@@ -138,43 +142,18 @@ uint8_t PositionControl::calibrateSystem()
             mc->moveServo(1,0,FULL_STOP);
             delay(2000);  // give the antenna a moment to settle
 
-            parkAntenna();
-            
             /* 
             Pass checkPosition as the new callback function to guyTimer
             and start polling for position via sensor @ 1 second (1000 miscroseconds)increments
             */
             auto CbPtr = std::bind(&PositionControl::checkPosition, this);
-            gt->guyTimer(CbPtr);
+            gt->guyTimer(CbPtr,50,true);
 
-            
+            parkAntenna();
 
         }
     }
-    return systemCalibrationScore;
-}
-
-void PositionControl::parkAntenna(int azPos, int elPos)
-{
-    
-    
-    
-    uint16_t cAz = this->currAz;
-    uint16_t cEl = this->currEl;
-    uint16_t cRoll = this->currRoll;
-    
-    targAz=0;
-    targEl=0;
-    targRoll=45;
-    
-    // int dirAz = servoDirection(355,cAz);
-    // int dirEl = servoDirection(0,cEl);
-    // int dirRoll = servoDirection(0,cRoll);
-    
-    // mc->moveServo(0,9,dirAz);
-    // mc->moveServo(1,7,dirEl);
-    // mc->moveDCMotor(dirRoll);
-    
+    //return systemCalibrationScore;
 }
 
 
@@ -183,6 +162,11 @@ void PositionControl::checkPosition()
     
     // Serial.print("currAz: "); Serial.print(currAz); Serial.print("\t|\ttargAz: "); Serial.print(targAz);
     //     Serial.print("\t|\tprevAz: "); Serial.println(prevAz); 
+
+    Serial.println("+++++++++ Checking Position ++++++++++++");
+    Serial.print("currEl: "); Serial.print(currEl); Serial.print("\t|\ttargEl: "); Serial.print(targEl);
+        Serial.print("\t|\tprevEl: "); Serial.println(prevEl); 
+        Serial.println(" ");
     
     //Serial.print("controlMethod: "); Serial.println(controlMethod);
     sensors_event_t event;
@@ -201,23 +185,48 @@ void PositionControl::checkPosition()
     //if (controlMethod == AUTO)
      ///{
 
-
+        /*
+        if this is the first time through the system, the previous positions
+        haven't yet been set, so set them = to the curr position, which is what will
+        happen automatically every other time */
+        if (!prevPosSet) 
+        {
+            prevPosSet=true;
+            prevAz=currAz;
+            prevEl=currEl;
+            prevRoll=currRoll;
+        }
 
         if (targAz!=prevAz  && !trackingAz)
         {
+            
             trackAz();
             if (!gt->setMillis(50))
             {
                 gt->setMillis(50);
             }
+            
         }
         if (targEl!=prevEl  && !trackingEl)
         {
+            // bool whatMils = gt->setMillis(50);
+            // Serial.println("xxxxxxxxxxxxx");
+            // Serial.print("xxxxxxxxxxxxxxx  whatMils: "); Serial.println(whatMils);
+            // Serial.println("xxxxxxxxxxxxx");
+            
             trackEl();
             if (!gt->setMillis(50))
             {
                 gt->setMillis(50);
             }
+
+            // whatMils = gt->setMillis(50);
+            // Serial.println("xxxxxxxxxxxxx");
+            // Serial.print("xxxxxxxxxxxxxxx  whatMils: "); Serial.println(whatMils);
+            // Serial.println("xxxxxxxxxxxxx");
+
+            
+            
         }
         if (targRoll!=prevRoll  && !trackingRoll)
         {
@@ -232,41 +241,6 @@ void PositionControl::checkPosition()
     //}
 }
 
-void PositionControl::trackAz()
-{
-    Serial.println("========= Tracking Azimuth ===========================");
-    if (!trackingAz)
-    {
-        uint8_t dir = servoDirection(targAz,prevAz);
-        trackingAz=true;
-        azTimer.start();
-        mc->moveServo(AZ_SERVO,9,dir);
-        Serial.print("Direction:");
-        Serial.print(dir);
-    }
-    
-    Serial.print("currAz:");
-    Serial.print(currAz);
-    Serial.print("\t|\ttargAz:");
-    Serial.print(targAz);
-    Serial.print("\t|\tprevAz:");
-    Serial.println(prevAz);
-    
-
-    //if (currAz>(targAz-1) && currAz<(targAz+1))
-    if (currAz == targAz)
-    {
-        //gt->setMillis(1000);
-        mc->moveServo(AZ_SERVO,0,FULL_STOP);
-        gt->stop();
-        //delay(3000);
-        gt->start(1000);
-        trackingAz=false;
-        azTimer.stop();
-     }
-    prevAz=currAz;
-}
-
 void PositionControl::trackEl()
 {
     Serial.println("========= Tracking Elevation ===========================");
@@ -275,7 +249,7 @@ void PositionControl::trackEl()
         uint8_t dir = servoDirection(targEl,prevEl,true);
         trackingEl=true;
         elTimer.start();
-        mc->moveServo(EL_SERVO,9,dir);
+        mc->moveServo(EL_SERVO,6,dir);
         Serial.print("El direction: "); Serial.println(dir);
     }
     
@@ -291,14 +265,54 @@ void PositionControl::trackEl()
     if (currEl == targEl)
     {
         //gt->setMillis(1000);
-        mc->moveServo(EL_SERVO,0,FULL_STOP);
+        
+        
         gt->stop();
-        //delay(3000);
-        gt->start(1000);
-        trackingEl=false;
         elTimer.stop();
+        trackingEl=false;
+        mc->moveServo(EL_SERVO,0,FULL_STOP);
+        
+        antennaStationaryCheck();
      }
     prevEl=currEl;
+}
+
+void PositionControl::trackAz()
+{
+    Serial.println("========= Tracking Azimuth ===========================");
+    if (!trackingAz)
+    {
+        uint8_t dir = servoDirection(targAz,prevAz);
+        trackingAz=true;
+        azTimer.start();
+        mc->moveServo(AZ_SERVO,8,dir);
+        Serial.print("Direction:");
+        Serial.print(dir);
+    }
+    
+    Serial.print("currAz:");
+    Serial.print(currAz);
+    Serial.print("\t|\ttargAz:");
+    Serial.print(targAz);
+    Serial.print("\t|\tprevAz:");
+    Serial.println(prevAz);
+    
+
+    //if (currAz>(targAz-1) && currAz<(targAz+1))
+    if (currAz == targAz)
+    {
+        
+        gt->stop();
+        azTimer.stop(); 
+        trackingAz=false;
+        mc->moveServo(AZ_SERVO,0,FULL_STOP);
+        
+        //delay(3000);
+        //gt->start(1000);
+        
+        antennaStationaryCheck();
+     }
+    prevAz=currAz;
 }
 
 void PositionControl::trackRoll()
@@ -320,15 +334,52 @@ void PositionControl::trackRoll()
     Serial.println(prevRoll);
     if (currRoll == targRoll)
     {
-        //gt->setMillis(1000);
-        mc->moveDCMotor(FULL_STOP);
-        //gt->stop();
-        //delay(3000);
-        //gt->start(1000);
-        trackingRoll=false;
+        
+        gt->stop();
         rollTimer.stop();
+        trackingRoll=false;
+        mc->moveDCMotor(FULL_STOP);
+        
+        antennaStationaryCheck();
      }
     prevRoll=currRoll;
+}
+
+void PositionControl::parkAntenna(int azPos, int elPos)
+{
+    
+    
+    
+    uint16_t cAz = this->currAz;
+    uint16_t cEl = this->currEl;
+    uint16_t cRoll = this->currRoll;
+    
+    targAz=20;
+    targEl=5;
+    targRoll=45;
+    
+    // int dirAz = servoDirection(355,cAz);
+    // int dirEl = servoDirection(0,cEl);
+    // int dirRoll = servoDirection(0,cRoll);
+    
+    // mc->moveServo(0,9,dirAz);
+    // mc->moveServo(1,7,dirEl);
+    // mc->moveDCMotor(dirRoll);
+    
+}
+
+void PositionControl::antennaStationaryCheck()
+{
+    if (!trackingAz && !trackingEl && !trackingRoll)
+    {
+        gt->start(1000);
+        //return true;
+    }
+    else
+    {
+         gt->start(50);
+        //return false;
+    }
 }
 
 void PositionControl::updateKeps(int az, int el)
@@ -336,6 +387,10 @@ void PositionControl::updateKeps(int az, int el)
     this->targAz = az;
     this->targEl = el;
    // Serial.print("updating keps");
+}
+
+void PositionControl::getCurrentTargets(){
+
 }
 
 void PositionControl::setControlMethod(uint8_t cm)
@@ -356,7 +411,7 @@ uint8_t PositionControl::servoDirection(int targ, int prev, bool el)
         
         if (el)
         {
-            // return 1; // COUNTER_CLOCKWISE
+            return 1; // COUNTER_CLOCKWISE
         }
         else
         {
@@ -417,6 +472,11 @@ uint8_t PositionControl::motorDirection(uint16_t targ, uint16_t prev)
         return 2; // FULL_STOP
     }
 
+}
+
+void PositionControl::setCalibrationCallback(std::function<void()> cb)
+{
+    this->calibrationCallback=cb;
 }
 
 

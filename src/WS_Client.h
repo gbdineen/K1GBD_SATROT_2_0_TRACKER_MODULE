@@ -6,8 +6,11 @@
 #include <WebSocketsClient.h>
 #include <ArduinoJson.h>
 #include <iostream>
+#include <functional>
 #include "MotorControl.h"
 #include "PositionControl.h"
+#include "GuyTimer.h"
+
 
 
 class WS_Client
@@ -25,10 +28,11 @@ class WS_Client
         
         WS_Client();
         WS_Client(MotorControl * mcPtr, PositionControl * pcPtr);
-        ~WS_Client();
         bool begin();
-        void loop();
         void sendTextToServer(String s);
+        void confirmCalibration();      
+        void loop();
+        ~WS_Client();
 
 };
 

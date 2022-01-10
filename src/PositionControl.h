@@ -12,21 +12,23 @@
 #include "GuyTimer.h"
 #include "MotorControl.h"
 
-#define MANUAL 0
-#define AUTO 1
+// SERVO CONTROL TYPES
+#define MANUAL 0 // speed control via rotary knobs
+#define AUTO 1 // az/el changes updated via rotary knobs
+#define UDP 2 // az/el updated via UDP packets
 #define EEPROM_SIZE 64
 
-struct CalibrationData
-{
+// struct CalibrationData
+// {
 
-    signed long accll;
-    signed long accllR;
-    signed long gyro;
-    signed long mag;
-    signed long magR;
+//     signed long accll;
+//     signed long accllR;
+//     signed long gyro;
+//     signed long mag;
+//     signed long magR;
 
 
-};
+// };
 
 class PositionControl
 {
@@ -34,6 +36,7 @@ class PositionControl
         
         bool calibrationActive;
         bool systemCalibrated;
+        bool prevPosSet = false;
         uint8_t controlMethod = AUTO;
         uint8_t systemCalibrationScore;
         uint8_t magScore;
@@ -43,6 +46,8 @@ class PositionControl
         GuyTimer elTimer;
         GuyTimer rollTimer;
         MotorControl * mc;
+        std::function<void()> calibrationCallback;
+
         uint16_t currAz;
         int currEl;
         int currRoll;
@@ -76,10 +81,13 @@ class PositionControl
         void trackAz();
         void trackEl();
         void trackRoll();
+        void antennaStationaryCheck();
         void updateKeps(int az, int el);
+        void getCurrentTargets();
         void setControlMethod(uint8_t cm);
         uint8_t servoDirection(int targ, int prev, bool el=false);
         uint8_t motorDirection(uint16_t targ, uint16_t prev);
+        void setCalibrationCallback(std::function<void()> cb);
         void loop();
         
         PositionControl(/* args */);

@@ -14,20 +14,10 @@ WS_Client::WS_Client(MotorControl * mcPtr, PositionControl * pcPtr)
     //std::cout << "WS_Client init\n";
 	this->mc = mcPtr;
     this->pc = pcPtr;
-}
+	auto CbPtr = std::bind(&WS_Client::confirmCalibration, this);
+	pc->setCalibrationCallback(CbPtr);
 
-void WS_Client::loop()
-{
-    wsc.loop();
 }
-
-void WS_Client::sendTextToServer(String s)
-{
-    //std::cout << "WS_Client::sendTextToServer";
-    //Serial.print("WS_Client::sendTextToServer "); Serial.println(s);
-    wsc.sendTXT(s);
-}
-
 
 bool WS_Client::begin()
 {
@@ -47,6 +37,24 @@ bool WS_Client::begin()
     wsc.enableHeartbeat(5000,3000,100);
     return true;
 }
+
+void WS_Client::sendTextToServer(String s)
+{
+    //std::cout << "WS_Client::sendTextToServer";
+    //Serial.print("WS_Client::sendTextToServer "); Serial.println(s);
+    wsc.sendTXT(s);
+}
+
+void WS_Client::confirmCalibration()
+{
+	StaticJsonDocument<200> obj;
+	String str;
+	obj["Subject"] = "system-calibration-status";
+	obj["Calibraton-Status"] = 1;
+	serializeJson(obj, str);
+	sendTextToServer(str);
+}
+
 
 void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 {
@@ -86,7 +94,9 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 			if (subject == "server-connection-confirmed")
 			{
 				Serial.println("=====> WS Init Step 5 : WS Server JSON broadcast recevied. Connection sequence complete. Beginning sensor calibration.");
+				//pc->setWS<WS_Client>(this);
 				pc->initBNO();
+
 			}
 			else if (subject == "manualcontrol")
 			{
@@ -109,6 +119,14 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 					pc->updateKeps(obj["Azimuth"],obj["Elevation"]);
 				}
 			}
+			else if (subject == "udpcontrol")
+			{
+				pc->setControlMethod(AUTO);
+				if (obj["Azimuth"] || obj["Elevation"])
+				{
+					pc->updateKeps(obj["Azimuth"],obj["Elevation"]);
+				}
+			}
 			else if (subject=="controlmethod")
 			{
 				pc->setControlMethod(obj["ControlMethod"]);
@@ -116,6 +134,11 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 
 			break;
 	}  
+}
+
+void WS_Client::loop()
+{
+    wsc.loop();
 }
 
 WS_Client::~WS_Client()

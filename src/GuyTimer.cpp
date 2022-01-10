@@ -38,15 +38,22 @@ bool GuyTimer::guyTimer(std::function<void()> cb, unsigned long ms, bool start)
 
 bool GuyTimer::setMillis(unsigned long timerMillis)
 {
+    
+    
+    Serial.println("\n0000000000000000000000000000000000000000000");
+    Serial.print("guyTimer->timerMillis: "); Serial.println(this->timerMillis);
+    Serial.println("0000000000000000000000000000000000000000000\n");
+
+    
     if (this->timerMillis==50)
     {
         return true;
     }
     else
     {
-        return false;
+        this->timerMillis = timerMillis;
     }
-    this->timerMillis = timerMillis;
+   return false; 
 }
 
 void GuyTimer::setCallback(std::function<void()> cb) 

@@ -39,7 +39,7 @@ void MotorControl::begin()
  */
 void MotorControl::moveServo(int svo, int spd, int dir)
 {
-   // std::cout << "Incoming speed: " << spd << "\n";
+   std::cout << "Incoming speed: " << spd << "\n";
     int pw;
     switch (dir) {
         case CLOCKWISE:

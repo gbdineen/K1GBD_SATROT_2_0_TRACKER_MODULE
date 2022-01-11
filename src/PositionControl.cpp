@@ -142,6 +142,10 @@ uint8_t PositionControl::calibrateSystem()
             mc->moveServo(1,0,FULL_STOP);
             delay(2000);  // give the antenna a moment to settle
 
+            
+            elTimer.start(50);
+            azTimer.start(50);
+            
             /* 
             Pass checkPosition as the new callback function to guyTimer
             and start polling for position via sensor @ 1 second (1000 miscroseconds)increments
@@ -166,13 +170,13 @@ void PositionControl::checkPosition()
     // Serial.print("currAz: "); Serial.print(currAz); Serial.print("\t|\ttargAz: "); Serial.print(targAz);
     //     Serial.print("\t|\tprevAz: "); Serial.println(prevAz); 
 
-    Serial.println("+++++++++++++++ [Checking Position] +++++++++++++++");
-    Serial.print("currEl: "); Serial.print(currEl); Serial.print("\t|\ttargEl: "); Serial.print(targEl); Serial.print("\t|\tprevEl: "); Serial.println(prevEl); 
-    Serial.println("---------------------------------------------------");
-    Serial.print("currAz: "); Serial.print(currAz); Serial.print("\t|\ttargAz: "); Serial.print(targAz); Serial.print("\t|\tprevAz: "); Serial.println(prevAz);
-    Serial.println("---------------------------------------------------");
-    Serial.print("currRoll: "); Serial.print(currRoll); Serial.print("\t|\ttargRoll: "); Serial.print(targRoll); Serial.print("\t|\tprevRoll: "); Serial.println(prevRoll); 
-    Serial.println(" ");
+    // Serial.println("+++++++++++++++ [Checking Position] +++++++++++++++");
+    // Serial.print("currEl: "); Serial.print(currEl); Serial.print("\t|\ttargEl: "); Serial.print(targEl); Serial.print("\t|\tprevEl: "); Serial.println(prevEl); 
+    // Serial.println("---------------------------------------------------");
+    // Serial.print("currAz: "); Serial.print(currAz); Serial.print("\t|\ttargAz: "); Serial.print(targAz); Serial.print("\t|\tprevAz: "); Serial.println(prevAz);
+    // Serial.println("---------------------------------------------------");
+    // Serial.print("currRoll: "); Serial.print(currRoll); Serial.print("\t|\ttargRoll: "); Serial.print(targRoll); Serial.print("\t|\tprevRoll: "); Serial.println(prevRoll); 
+    // Serial.println(" ");
     
     //Serial.print("controlMethod: "); Serial.println(controlMethod);
     sensors_event_t event;
@@ -208,42 +212,32 @@ void PositionControl::checkPosition()
            //setTargets(); 
         }
 
-        if (targAz!=prevAz  && !trackingAz)
-        {
+        // if (targAz!=prevAz  && !trackingAz)
+        // {
             
-            trackAz();
-            if (!gt->setMillis(50))
-            {
-                gt->setMillis(50);
-            }
+        //     trackAz();
+        //     if (!gt->setMillis(50))
+        //     {
+        //         gt->setMillis(50);
+        //     }
             
-        }
-        if (targEl!=prevEl  && !trackingEl)
-        {
-            // bool whatMils = gt->setMillis(50);
-            // Serial.println("xxxxxxxxxxxxx");
-            // Serial.print("xxxxxxxxxxxxxxx  whatMils: "); Serial.println(whatMils);
-            // Serial.println("xxxxxxxxxxxxx");
-            
-            trackEl();
-            if (!gt->setMillis(50))
-            {
-                gt->setMillis(50);
-            }
+        // }
+        // if (targEl!=prevEl  && !trackingEl)
+        // {
+        //     trackEl();
+        //     if (!gt->setMillis(50))
+        //     {
+        //         gt->setMillis(50);
+        //     }
 
-            // whatMils = gt->setMillis(50);
-            // Serial.println("xxxxxxxxxxxxx");
-            // Serial.print("xxxxxxxxxxxxxxx  whatMils: "); Serial.println(whatMils);
-            // Serial.println("xxxxxxxxxxxxx");
-
-        }
+        // }
         if (targRoll!=prevRoll  && !trackingRoll)
         {
             trackRoll();
-            if (!gt->setMillis(50))
-            {
+            // if (!gt->setMillis(50))
+            // {
                 gt->setMillis(50);
-            }
+            //}
         }
 
 
@@ -253,74 +247,70 @@ void PositionControl::checkPosition()
 void PositionControl::trackEl()
 {
     Serial.println("========= Tracking Elevation ===========================");
-    if (!trackingEl)
+    if (targEl!=prevEl)
     {
         uint8_t dir = servoDirection(targEl,prevEl,true);
         trackingEl=true;
-        elTimer.start();
-        mc->moveServo(EL_SERVO,6,dir);
+        if (!gt->setMillis(50))
+        {
+            gt->setMillis(50);
+        }
+        elTimer.start(50);
+        mc->moveServo(EL_SERVO,7,dir);
         Serial.print("El direction: "); Serial.println(dir);
+        
+        if (currEl == targEl)
+        {
+            elTimer.start(1000);
+            trackingEl=false;
+            mc->moveServo(EL_SERVO,0,FULL_STOP);
+            
+            antennaStationaryCheck();
+            prevEl=currEl;
+        }
+        Serial.print("currEl:");
+        Serial.print(currEl);
+        Serial.print("\t|\ttargEl:");
+        Serial.print(targEl);
+        Serial.print("\t|\tprevEl:");
+        Serial.println(prevEl);
     }
-    
-    Serial.print("currEl:");
-    Serial.print(currEl);
-    Serial.print("\t|\ttargEl:");
-    Serial.print(targEl);
-    Serial.print("\t|\tprevEl:");
-    Serial.println(prevEl);
-    
-
-    //if (currAz>(targAz-1) && currAz<(targAz+1))
-    if (currEl == targEl)
-    {
-        //gt->setMillis(1000);
-        
-        
-        //gt->stop();
-        elTimer.stop();
-        trackingEl=false;
-        mc->moveServo(EL_SERVO,0,FULL_STOP);
-        
-        antennaStationaryCheck();
-     }
-    prevEl=currEl;
 }
 
 void PositionControl::trackAz()
 {
     Serial.println("========= Tracking Azimuth ===========================");
-    if (!trackingAz)
+    if (targAz!=prevAz)
     {
         uint8_t dir = servoDirection(targAz,prevAz);
         trackingAz=true;
+        bool gtt = gt->setMillis(50);
+        Serial.print("---------------------Guy timer? ---------------> "); Serial.println(gtt);
+        if (!gt->setMillis(50))
+        {
+            gt->setMillis(50);
+        }
         azTimer.start();
-        mc->moveServo(AZ_SERVO,8,dir);
+        mc->moveServo(AZ_SERVO,7,dir);
         Serial.print("Direction: "); Serial.println(dir);
-    }
-    
-    Serial.print("currAz:");
-    Serial.print(currAz);
-    Serial.print("\t|\ttargAz:");
-    Serial.print(targAz);
-    Serial.print("\t|\tprevAz:");
-    Serial.println(prevAz);
-    
 
-    //if (currAz>(targAz-1) && currAz<(targAz+1))
-    if (currAz == targAz)
-    {
-        
-        //gt->stop();
-        azTimer.stop(); 
-        trackingAz=false;
-        mc->moveServo(AZ_SERVO,0,FULL_STOP);
-        
-        //delay(3000);
-        //gt->start(1000);
-        
-        antennaStationaryCheck();
-     }
-    prevAz=currAz;
+        if (currAz == targAz)
+        {
+            
+            azTimer.start(1000); 
+            trackingAz=false;
+            mc->moveServo(AZ_SERVO,0,FULL_STOP);
+            
+            antennaStationaryCheck();
+            prevAz=currAz;
+        }
+        Serial.print("currAz:");
+        Serial.print(currAz);
+        Serial.print("\t|\ttargAz:");
+        Serial.print(targAz);
+        Serial.print("\t|\tprevAz:");
+        Serial.println(prevAz);
+    }
 }
 
 void PositionControl::trackRoll()
@@ -378,7 +368,7 @@ void PositionControl::antennaStationaryCheck()
         setTargets();
         // if (controlMethod!=UDP)
         // {
-            gt->start(1000);
+           // gt->start(1000);
             //return true;
         // }
         // else
@@ -386,11 +376,11 @@ void PositionControl::antennaStationaryCheck()
         //     gt->start(50);
         // }
     }
-    else
-    {
-         gt->start(50);
-        //return false;
-    }
+    // else
+    // {
+    //      gt->start(50);
+    //     //return false;
+    // }
 }
 
 void PositionControl::updateKeps(int az, int el)

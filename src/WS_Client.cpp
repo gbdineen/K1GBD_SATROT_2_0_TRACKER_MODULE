@@ -137,11 +137,13 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 			}
 			else if (subject == "udpcontrol")
 			{
+				String pay = (char*) payload;
+				Serial.println(pay);
 				pc->setControlMethod(UDP);
-				if (obj["Azimuth"] || obj["Elevation"])
-				{
+				// if (obj["Azimuth"] || obj["Elevation"])
+				// {
 					pc->updateKeps(obj["Azimuth"],obj["Elevation"]);
-				}
+				// }
 			}
 			else if (subject=="controlmethod")
 			{

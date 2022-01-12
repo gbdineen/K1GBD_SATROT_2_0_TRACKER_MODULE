@@ -34,6 +34,7 @@ class PositionControl
 {
     private:
         
+        int bnoInterval = 100;
         bool calibrationActive;
         bool systemCalibrated;
         bool prevPosSet = false;

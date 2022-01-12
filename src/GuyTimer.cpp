@@ -43,16 +43,16 @@ bool GuyTimer::setMillis(unsigned long timerMillis)
     
     if (this->timerMillis==50)
     {
-        Serial.println("\n0000000000000000000000000000000000000000000");
-        Serial.print("guyTimer->timerMillis: "); Serial.print(this->timerMillis); Serial.println("\tTRUE");
-        Serial.println("0000000000000000000000000000000000000000000\n");
+        // Serial.println("\n0000000000000000000000000000000000000000000");
+        // Serial.print("guyTimer->timerMillis: "); Serial.print(this->timerMillis); Serial.println("\tTRUE");
+        // Serial.println("0000000000000000000000000000000000000000000\n");
         return true;
     }
     else
     {
-        Serial.println("\n0000000000000000000000000000000000000000000");
-        Serial.print("guyTimer->timerMillis: "); Serial.print(this->timerMillis); Serial.println("\FALSE");
-        Serial.println("0000000000000000000000000000000000000000000\n");
+        // Serial.println("\n0000000000000000000000000000000000000000000");
+        // Serial.print("guyTimer->timerMillis: "); Serial.print(this->timerMillis); Serial.println("\FALSE");
+        // Serial.println("0000000000000000000000000000000000000000000\n");
         this->timerMillis = timerMillis;
         return false; 
     }

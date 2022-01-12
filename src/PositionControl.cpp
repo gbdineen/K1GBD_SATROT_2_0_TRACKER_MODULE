@@ -143,15 +143,15 @@ uint8_t PositionControl::calibrateSystem()
             delay(2000);  // give the antenna a moment to settle
 
             
-            elTimer.start(50);
-            azTimer.start(50);
+            elTimer.start(bnoInterval);
+            azTimer.start(bnoInterval);
             
             /* 
             Pass checkPosition as the new callback function to guyTimer
             and start polling for position via sensor @ 1 second (1000 miscroseconds)increments
             */
             auto CbPtr = std::bind(&PositionControl::checkPosition, this);
-            gt->guyTimer(CbPtr,50,true);
+            gt->guyTimer(CbPtr,bnoInterval,true);
 
             if (controlMethod!=UDP)
             {
@@ -236,7 +236,7 @@ void PositionControl::checkPosition()
             trackRoll();
             // if (!gt->setMillis(50))
             // {
-                gt->setMillis(50);
+                gt->setMillis(bnoInterval);
             //}
         }
 
@@ -251,12 +251,12 @@ void PositionControl::trackEl()
     {
         uint8_t dir = servoDirection(targEl,prevEl,true);
         trackingEl=true;
-        if (!gt->setMillis(50))
+        if (!gt->setMillis(bnoInterval))
         {
-            gt->setMillis(50);
+            gt->setMillis(bnoInterval);
         }
-        elTimer.start(50);
-        mc->moveServo(EL_SERVO,7,dir);
+        elTimer.start(bnoInterval);
+        mc->moveServo(EL_SERVO,6,dir);
         Serial.print("El direction: "); Serial.println(dir);
         
         if (currEl == targEl)
@@ -266,8 +266,9 @@ void PositionControl::trackEl()
             mc->moveServo(EL_SERVO,0,FULL_STOP);
             
             antennaStationaryCheck();
-            prevEl=currEl;
+            
         }
+        prevEl=currEl;
         Serial.print("currEl:");
         Serial.print(currEl);
         Serial.print("\t|\ttargEl:");
@@ -284,26 +285,27 @@ void PositionControl::trackAz()
     {
         uint8_t dir = servoDirection(targAz,prevAz);
         trackingAz=true;
-        bool gtt = gt->setMillis(50);
-        Serial.print("---------------------Guy timer? ---------------> "); Serial.println(gtt);
-        if (!gt->setMillis(50))
+        // bool gtt = gt->setMillis(bnoInterval);
+        // Serial.print("---------------------Guy timer? ---------------> "); Serial.println(gtt);
+        if (!gt->setMillis(bnoInterval))
         {
-            gt->setMillis(50);
+            gt->setMillis(bnoInterval);
         }
         azTimer.start();
-        mc->moveServo(AZ_SERVO,7,dir);
+        mc->moveServo(AZ_SERVO,8,dir);
         Serial.print("Direction: "); Serial.println(dir);
 
         if (currAz == targAz)
         {
             
-            azTimer.start(1000); 
+            azTimer.start(1000);
             trackingAz=false;
             mc->moveServo(AZ_SERVO,0,FULL_STOP);
             
             antennaStationaryCheck();
-            prevAz=currAz;
+            
         }
+        prevAz=currAz;
         Serial.print("currAz:");
         Serial.print(currAz);
         Serial.print("\t|\ttargAz:");
@@ -365,7 +367,12 @@ void PositionControl::antennaStationaryCheck()
 {
     if (!trackingAz && !trackingEl && !trackingRoll)
     {
-        setTargets();
+       // setTargets();
+
+        // give the sensor a breather otherwise it'll overflow and lag behind
+        //gt->stop();
+        //delay(200);
+        //gt->start(bnoInterval);
         // if (controlMethod!=UDP)
         // {
            // gt->start(1000);

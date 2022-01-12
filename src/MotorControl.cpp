@@ -74,11 +74,11 @@ void MotorControl::moveDCMotor(int dir)
     switch (dir)
     {
         case CLOCKWISE:
-        myMotor->run(BACKWARD);
+        myMotor->run(FORWARD);
         break;
 
         case COUNTER_CLOCKWISE:
-        myMotor->run(FORWARD);
+        myMotor->run(BACKWARD);
         break;
 
         case FULL_STOP:

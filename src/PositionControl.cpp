@@ -283,17 +283,22 @@ void PositionControl::trackAz()
     Serial.println("========= Tracking Azimuth ===========================");
     if (targAz!=prevAz)
     {
-        uint8_t dir = servoDirection(targAz,prevAz);
-        trackingAz=true;
-        // bool gtt = gt->setMillis(bnoInterval);
-        // Serial.print("---------------------Guy timer? ---------------> "); Serial.println(gtt);
-        if (!gt->setMillis(bnoInterval))
+        if (!trackingAz)
         {
-            gt->setMillis(bnoInterval);
+            uint8_t dir = servoDirection(targAz,prevAz);
+            trackingAz=true;
+            // bool gtt = gt->setMillis(bnoInterval);
+            // Serial.print("---------------------Guy timer? ---------------> "); Serial.println(gtt);
+            if (!gt->setMillis(bnoInterval))
+            {
+                gt->setMillis(bnoInterval);
+                tempTimerCount++;
+                Serial.print("---------------------------------------------------tempTimerCount: "); Serial.println(tempTimerCount);
+            }
+            azTimer.start();
+            mc->moveServo(AZ_SERVO,8,dir);
+            Serial.print("Direction: "); Serial.println(dir);
         }
-        azTimer.start();
-        mc->moveServo(AZ_SERVO,8,dir);
-        Serial.print("Direction: "); Serial.println(dir);
 
         if (currAz == targAz)
         {
@@ -434,14 +439,7 @@ uint8_t PositionControl::servoDirection(int targ, int prev, bool el)
             return 0; // CLOCKWISE
         }
         
-        // if (!az) {
-        //     return 0; // CLOCKWISE
-        //      // return 1; // COUNTER_CLOCKWISE
-        // }
-        // else
-        // {
-        //     return 1; // COUNTER_CLOCKWISE
-        // }   
+         
     }
     else if (targ<prev)
     {  

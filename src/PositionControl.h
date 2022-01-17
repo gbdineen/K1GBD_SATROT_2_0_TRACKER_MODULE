@@ -17,6 +17,9 @@
 #define AUTO 1 // az/el changes updated via rotary knobs
 #define UDP 2 // az/el updated via UDP packets
 #define EEPROM_SIZE 64
+#define AZIMUTH_SERVO 0
+#define ELEVATION_SERVO 1
+#define ROLL_MOTOR 2
 
 // struct CalibrationData
 // {
@@ -89,7 +92,7 @@ class PositionControl
         void updateKeps(int az, int el);
         void getCurrentTargets();
         void setControlMethod(uint8_t cm);
-        uint8_t servoDirection(int targ, int prev, bool el=false);
+        uint8_t servoDirection(int targ, int prev, int servo);
         uint8_t motorDirection(uint16_t targ, uint16_t prev);
         void setCalibrationCallback(std::function<void()> cb);
         void setTargetsCallback(std::function<void(int az, int el, int roll)> cb);

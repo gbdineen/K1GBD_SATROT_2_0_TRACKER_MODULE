@@ -285,7 +285,7 @@ void PositionControl::trackAz()
     {
         if (!trackingAz)
         {
-            uint8_t dir = servoDirection(targAz,prevAz);
+            uint8_t dir = servoDirection(targAz,prevAz,AZIMUTH_SERVO);
             trackingAz=true;
             // bool gtt = gt->setMillis(bnoInterval);
             // Serial.print("---------------------Guy timer? ---------------> "); Serial.println(gtt);
@@ -325,7 +325,7 @@ void PositionControl::trackRoll()
     Serial.println("========= Tracking Roll ===========================");
     if (!trackingRoll)
     {
-        uint8_t dir = servoDirection(targRoll,prevRoll);
+        uint8_t dir = servoDirection(targRoll,prevRoll, ROLL_MOTOR);
         trackingRoll=true;
         rollTimer.start();
         mc->moveDCMotor(dir);
@@ -378,15 +378,15 @@ void PositionControl::antennaStationaryCheck()
         //gt->stop();
         //delay(200);
         //gt->start(bnoInterval);
-        // if (controlMethod!=UDP)
-        // {
-           // gt->start(1000);
+        if (controlMethod!=UDP)
+        {
+           gt->start(1000);
             //return true;
-        // }
-        // else
-        // {
-        //     gt->start(50);
-        // }
+        }
+        else
+        {
+            gt->start(50);
+        }
     }
     // else
     // {
@@ -420,54 +420,90 @@ void PositionControl::setControlMethod(uint8_t cm)
     //Serial.print("Control Method set to "); Serial.println(controlMethod);
 }
 
-uint8_t PositionControl::servoDirection(int targ, int prev, bool el)
+uint8_t PositionControl::servoDirection(int targ, int prev, int servo)
 {
     
-    // if (!prev)
-    // {
-    //     prev=currAz;
-    // }
-    if (targ>prev)
+    if (servo==AZIMUTH_SERVO)
     {
-        
-        if (el)
+        int absDiff = abs(targ-prev); // determine the absolute value difference between target and previous to determine the shortest route
+        if (targ<prev)
         {
-            return 1; // COUNTER_CLOCKWISE
+            if (absDiff<=180)
+            {
+                return 0;
+            }
+            else if (absDiff>180)
+            {
+                return 1;
+            }
+        }
+        else if (targ>prev)
+        {
+            if (absDiff<=180)
+            {
+                return 1;
+            }
+            else if (absDiff>180)
+            {
+                return 0;
+            }
         }
         else
         {
-            return 0; // CLOCKWISE
+            return 2;
         }
-        
-         
     }
-    else if (targ<prev)
-    {  
-        
-        if (el)
+    else if (servo==ELEVATION_SERVO)
+    {
+        if (targ<prev)
         {
-            return 0; // CLOCKWISE
+            return 0;
+        }
+        else if (targ<prev)
+        {
+            return 1;
         }
         else
         {
-            return 1; // COUNTER_CLOCKWISE
+            return 2;
         }
 
-        //return 1; // COUNTER_CLOCKWISE
+    }
+    
+    
+    
+    // // if (!prev)
+    // // {
+    // //     prev=currAz;
+    // // }
+    // if (targ>prev)
+    // {
         
-        // if (!az) {
-        //     //return 0; // CLOCKWISE
-        //     return 1; // COUNTER_CLOCKWISE
-        // }
-        // else
-        // {
-        //     return 0; // CLOCKWISE
-        // }
-    }
-    else
-    {
-        return 2; // FULL_STOP
-    }
+    //     if (el)
+    //     {
+    //         return 1; // COUNTER_CLOCKWISE
+    //     }
+    //     else
+    //     {
+    //         return 0; // CLOCKWISE
+    //     }
+    //  }
+    // else if (targ<prev)
+    // {  
+        
+    //     if (el)
+    //     {
+    //         return 0; // CLOCKWISE
+    //     }
+    //     else
+    //     {
+    //         return 1; // COUNTER_CLOCKWISE
+    //     }
+    // }
+    // else
+    // {
+    //     return 2; // FULL_STOP
+    // }
 }
 
 uint8_t PositionControl::motorDirection(uint16_t targ, uint16_t prev)

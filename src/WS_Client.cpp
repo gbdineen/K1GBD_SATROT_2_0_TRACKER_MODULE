@@ -114,22 +114,22 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 				pc->initBNO();
 
 			}
-			else if (subject == "manualcontrol")
+			else if (subject == "MANUAL_SPEED")
 			{
 				//Serial.print("Manual control");
-				pc->setControlMethod(MANUAL);
+				pc->setControlMethod(MANUAL_SPEED);
 				if (rollcontrol=="false")
 				{
-					mc->moveServo(obj["Servo"],obj["Position"],obj["Direction"]);	
+					mc->moveServo(obj["Servo"],obj["Speed"],obj["Direction"]);	
 				}
 				else
 				{
 					mc->moveDCMotor(obj["Direction"]);
 				}
 			}
-			else if (subject == "autocontrol")
+			else if (subject == "MANUAL_POSITION")
 			{
-				pc->setControlMethod(AUTO);
+				pc->setControlMethod(MANUAL_POSITION);
 				if (obj["Azimuth"] || obj["Elevation"])
 				{
 					pc->updateKeps(obj["Azimuth"],obj["Elevation"]);

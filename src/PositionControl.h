@@ -13,8 +13,8 @@
 #include "MotorControl.h"
 
 // SERVO CONTROL TYPES
-#define MANUAL 0 // speed control via rotary knobs
-#define AUTO 1 // az/el changes updated via rotary knobs
+#define MANUAL_SPEED 0 // speed control via rotary knobs
+#define MANUAL_POSITION 1 // az/el changes updated via rotary knobs
 #define UDP 2 // az/el updated via UDP packets
 #define EEPROM_SIZE 64
 #define AZIMUTH_SERVO 0
@@ -43,7 +43,7 @@ class PositionControl
         bool calibrationActive;
         bool systemCalibrated;
         bool prevPosSet = false;
-        uint8_t controlMethod = AUTO;
+        uint8_t controlMethod = MANUAL_SPEED;
         uint8_t systemCalibrationScore;
         uint8_t magScore;
         Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);

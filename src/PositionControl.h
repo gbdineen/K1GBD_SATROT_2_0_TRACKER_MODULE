@@ -43,6 +43,7 @@ class PositionControl
         bool calibrationActive;
         bool systemCalibrated;
         bool prevPosSet = false;
+        bool initialServoStart=false;
         uint8_t controlMethod = MANUAL_SPEED;
         uint8_t systemCalibrationScore;
         uint8_t magScore;

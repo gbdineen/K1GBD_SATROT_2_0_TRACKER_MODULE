@@ -143,20 +143,24 @@ uint8_t PositionControl::calibrateSystem()
             delay(2000);  // give the antenna a moment to settle
 
             
-            elTimer.start(bnoInterval);
-            azTimer.start(bnoInterval);
+            
             
             /* 
             Pass checkPosition as the new callback function to guyTimer
             and start polling for position via sensor @ 1 second (1000 miscroseconds)increments
             */
-            auto CbPtr = std::bind(&PositionControl::checkPosition, this);
-            gt->guyTimer(CbPtr,bnoInterval,true);
-
             if (controlMethod!=UDP)
             {
                 parkAntenna();
             }
+
+            auto CbPtr = std::bind(&PositionControl::checkPosition, this);
+            gt->guyTimer(CbPtr,bnoInterval,true);
+
+            // elTimer.start(bnoInterval);
+            // azTimer.start(bnoInterval);
+
+            
 
         }
     }
@@ -207,41 +211,23 @@ void PositionControl::checkPosition()
             prevRoll=currRoll;
             setTargets();
         }
-        else
+
+        if (!initialServoStart) // starting the servo timers at this juncture gives the sensor a moment to collect its first set up data
         {
-           //setTargets(); 
+            initialServoStart=true;
+            elTimer.start(bnoInterval);
+            azTimer.start(bnoInterval);
         }
 
-        // if (targAz!=prevAz  && !trackingAz)
-        // {
-            
-        //     trackAz();
-        //     if (!gt->setMillis(50))
-        //     {
-        //         gt->setMillis(50);
-        //     }
-            
-        // }
-        // if (targEl!=prevEl  && !trackingEl)
-        // {
-        //     trackEl();
-        //     if (!gt->setMillis(50))
-        //     {
-        //         gt->setMillis(50);
-        //     }
 
-        // }
+
+        
         if (targRoll!=prevRoll  && !trackingRoll)
         {
             trackRoll();
-            // if (!gt->setMillis(50))
-            // {
-                gt->setMillis(bnoInterval);
-            //}
+            gt->setMillis(bnoInterval);
+           
         }
-
-
-    //}
 }
 
 void PositionControl::trackEl()
@@ -249,7 +235,7 @@ void PositionControl::trackEl()
     Serial.println("========= Tracking Elevation ===========================");
     if (targEl!=prevEl)
     {
-        uint8_t dir = servoDirection(targEl,prevEl,true);
+        uint8_t dir = servoDirection(targEl,prevEl,ELEVATION_SERVO);
         trackingEl=true;
         if (!gt->setMillis(bnoInterval))
         {
@@ -297,7 +283,7 @@ void PositionControl::trackAz()
             }
             azTimer.start();
             mc->moveServo(AZ_SERVO,8,dir);
-            Serial.print("Direction: "); Serial.println(dir);
+            Serial.print("Az Direction: "); Serial.println(dir);
         }
 
         if (currAz == targAz)
@@ -353,6 +339,7 @@ void PositionControl::trackRoll()
 void PositionControl::parkAntenna(int azPos, int elPos)
 {
     
+    Serial.println("********************************************************> PARKING ANTENNA");
     
     targAz=20;
     targEl=5;
@@ -426,26 +413,27 @@ uint8_t PositionControl::servoDirection(int targ, int prev, int servo)
     if (servo==AZIMUTH_SERVO)
     {
         int absDiff = abs(targ-prev); // determine the absolute value difference between target and previous to determine the shortest route
+        Serial.print("\n\nabsDiff: "); Serial.print(absDiff);  Serial.println("\n\n");  
         if (targ<prev)
         {
             if (absDiff<=180)
             {
-                return 0;
+                return 1;
             }
             else if (absDiff>180)
             {
-                return 1;
+                return 0;
             }
         }
         else if (targ>prev)
         {
             if (absDiff<=180)
             {
-                return 1;
+                return 0;
             }
             else if (absDiff>180)
             {
-                return 0;
+                return 1;
             }
         }
         else
@@ -459,7 +447,7 @@ uint8_t PositionControl::servoDirection(int targ, int prev, int servo)
         {
             return 0;
         }
-        else if (targ<prev)
+        else if (targ>prev)
         {
             return 1;
         }
@@ -468,6 +456,21 @@ uint8_t PositionControl::servoDirection(int targ, int prev, int servo)
             return 2;
         }
 
+    }
+    else if (servo==ROLL_MOTOR)
+    {
+        if (targ<prev)
+        {
+            return 1;
+        }
+        else if (targ>prev)
+        {
+            return 0;
+        }
+        else
+        {
+            return 2;
+        }
     }
     
     

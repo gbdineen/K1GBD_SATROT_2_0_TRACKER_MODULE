@@ -18,7 +18,7 @@ class MotorControl
     private:
         
         // LET'S DECLARE SOME CONSTANCES FOR INTERACTING WITH THE SERVOS
-        const int MIN_PULSE_WIDTH = 210;
+        const int MIN_PULSE_WIDTH = 230;
         const int MAX_PULSE_WIDTH = 1034;
         const float PWM_FREQUENCY = 100;
 

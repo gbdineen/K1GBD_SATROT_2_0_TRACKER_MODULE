@@ -20,6 +20,9 @@ WS_Client::WS_Client(MotorControl * mcPtr, PositionControl * pcPtr)
 	auto TgPtr = std::bind(&WS_Client::setTargets, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 	pc->setTargetsCallback(TgPtr);
 
+	auto PoPtr = std::bind(&WS_Client::getCurrPosition, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+	pc->setPositionCallback(PoPtr);
+
 }
 
 bool WS_Client::begin()
@@ -60,7 +63,7 @@ void WS_Client::confirmCalibration()
 
 void WS_Client::setTargets(int az, int el, int roll)
 {
-	Serial.print("\n----- [Setting Targets 2] -----]\n");
+	//Serial.print("\n----- [Setting Targets 2] -----]\n");
 	StaticJsonDocument<200> tobj;
 	String tstr;
 	tobj["Subject"] = "previous-targets";
@@ -69,6 +72,19 @@ void WS_Client::setTargets(int az, int el, int roll)
 	tobj["Roll"] = roll;
 	serializeJson(tobj, tstr);
 	sendTextToServer(tstr);
+}
+
+void WS_Client::getCurrPosition(int az, int el, int roll)
+{
+	//Serial.print("\n----- [Setting Targets 2] -----]\n");
+	StaticJsonDocument<200> obj;
+	String str;
+	obj["Subject"] = "current-position";
+	obj["Azimuth"] = az;
+	obj["Elevation"] = el;
+	obj["Roll"] = roll;
+	serializeJson(obj, str);
+	sendTextToServer(str);
 }
 
 
@@ -118,14 +134,17 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 			{
 				//Serial.print("Manual control");
 				pc->setControlMethod(MANUAL_SPEED);
-				if (rollcontrol=="false")
-				{
-					mc->moveServo(obj["Servo"],obj["Speed"],obj["Direction"]);	
-				}
-				else
-				{
-					mc->moveDCMotor(obj["Direction"]);
-				}
+				// if (pc->getCalibrationStatus())
+				// {
+					if (rollcontrol=="false")
+					{
+						mc->moveServo(obj["Servo"],obj["Speed"],obj["Direction"]);	
+					}
+					else
+					{
+						mc->moveDCMotor(obj["Direction"]);
+					}
+				//}
 			}
 			else if (subject == "MANUAL_POSITION")
 			{
@@ -148,6 +167,10 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 			else if (subject=="controlmethod")
 			{
 				pc->setControlMethod(obj["ControlMethod"]);
+			}
+			else if (subject=="get-position")
+			{
+				pc->getCurrPosition();
 			}
 
 			break;

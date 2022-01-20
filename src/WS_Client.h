@@ -31,7 +31,8 @@ class WS_Client
         bool begin();
         void sendTextToServer(String s);
         void confirmCalibration();
-        void setTargets(int az, int el, int roll);     
+        void setTargets(int az, int el, int roll);
+        void getCurrPosition(int az, int el, int roll);     
         void loop();
         ~WS_Client();
 

@@ -55,6 +55,7 @@ class PositionControl
         MotorControl * mc;
         std::function<void()> calibrationCallback;
         std::function<void(int az, int el, int roll)> targetsCallback;
+        std::function<void(int az, int el, int roll)> positionCallback;
 
         uint16_t currAz;
         int currEl;
@@ -86,6 +87,7 @@ class PositionControl
         uint8_t calibrateSystem();
         void parkAntenna(int azPos=355, int elPos=0);
         void checkPosition();
+        std::vector<int> getCurrPosition();
         void trackAz();
         void trackEl();
         void trackRoll();
@@ -97,7 +99,9 @@ class PositionControl
         uint8_t motorDirection(uint16_t targ, uint16_t prev);
         void setCalibrationCallback(std::function<void()> cb);
         void setTargetsCallback(std::function<void(int az, int el, int roll)> cb);
+        void setPositionCallback(std::function<void(int az, int el, int roll)> cb);
         void setTargets();
+        bool getCalibrationStatus();
         void loop();
         
         PositionControl(/* args */);

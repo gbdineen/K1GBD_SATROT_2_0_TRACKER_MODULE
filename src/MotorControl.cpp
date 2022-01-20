@@ -52,9 +52,9 @@ void MotorControl::moveServo(int svo, int spd, int dir)
         break;
 
         case FULL_STOP:
-        //pw = calcPWM(SERVO_HIGH_RANGE/2);
+        pw = calcPWM(SERVO_HIGH_RANGE/2);
         //pw = MAX_PULSE_WIDTH-(MIN_PULSE_WIDTH*2);
-        pw = 0;
+        //pw = 0;
         break;
     }
     //Serial.print("MotorControl::moveMotor: speed: "); Serial.print(spd);

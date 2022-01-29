@@ -56,6 +56,7 @@ class PositionControl
         std::function<void()> calibrationCallback;
         std::function<void(int az, int el, int roll)> targetsCallback;
         std::function<void(int az, int el, int roll)> positionCallback;
+        std::function<void(int az, int el, int roll)> udpStatusCallback;
 
         uint16_t currAz;
         int currEl;
@@ -83,7 +84,7 @@ class PositionControl
     public:
         
         void initBNO();
-        void autoCalibration();
+        void overrideCalibration();
         uint8_t calibrateSystem();
         void parkAntenna(int azPos=355, int elPos=0);
         void checkPosition();

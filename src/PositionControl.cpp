@@ -53,8 +53,10 @@ void PositionControl::initBNO()
         }
         */
 
-        auto CbPtr = std::bind(&PositionControl::calibrateSystem, this);
-        gt->guyTimer(CbPtr);
+        // auto CbPtr = std::bind(&PositionControl::calibrateSystem, this);
+        // gt->guyTimer(CbPtr);
+
+        overrideCalibration();
 
     }
 }
@@ -75,9 +77,42 @@ bool PositionControl::checkCalibrationEEPROM()
 
 }
 
-void PositionControl::autoCalibration()
+void PositionControl::overrideCalibration()
 {
+    this->calibrationCallback(); // Send notification to WS_Client that calibration has been completed and we're ready to start taking UDP packets
 
+    gt->stop();  // Stop the timer from checking for any further calibration
+    
+    /*
+    adafruit_bno055_offsets_t offsets;
+    putEEPROM(400,offsets);  // Store the calibration data we just got into EEPROM
+    setSensorOffsets(offsets); // Set the calibration data into the BNO sensor to have and to hold until a power cut dues us part
+    */
+
+    //setControlMethod(AUTO); // temp for testing. should happen explicitly from user input
+
+    calibrationActive=false;
+    systemCalibrated=true;
+
+    mc->moveDCMotor(FULL_STOP);
+    mc->moveServo(0,0,FULL_STOP);
+    mc->moveServo(1,0,FULL_STOP);
+    delay(2000);  // give the antenna a moment to settle
+
+    
+    
+    
+    /* 
+    Pass checkPosition as the new callback function to guyTimer
+    and start polling for position via sensor @ 1 second (1000 miscroseconds)increments
+    */
+    // if (controlMethod!=UDP)
+    // {
+        parkAntenna();
+    //}
+
+    auto CbPtr = std::bind(&PositionControl::checkPosition, this);
+    gt->guyTimer(CbPtr,bnoInterval,true);
 
 }
 
@@ -149,10 +184,10 @@ uint8_t PositionControl::calibrateSystem()
             Pass checkPosition as the new callback function to guyTimer
             and start polling for position via sensor @ 1 second (1000 miscroseconds)increments
             */
-            if (controlMethod!=UDP)
-            {
+            // if (controlMethod!=UDP)
+            // {
                 parkAntenna();
-            }
+            //}
 
             auto CbPtr = std::bind(&PositionControl::checkPosition, this);
             gt->guyTimer(CbPtr,bnoInterval,true);
@@ -189,13 +224,13 @@ void PositionControl::checkPosition()
     currEl = -event.orientation.z;
     currRoll = event.orientation.y;
 
-    uint8_t system, gyro, accel, mag;
-    system = gyro = accel = mag = 0;
-    bno.getCalibration(&system, &gyro, &accel, &mag);
+    // uint8_t system, gyro, accel, mag;
+    // system = gyro = accel = mag = 0;
+    // bno.getCalibration(&system, &gyro, &accel, &mag);
 
-    Serial.println("+++++++++++++++ [Checking Calibration] +++++++++++++++"); 
-     Serial.print("Sys:"); Serial.print(system); Serial.print(" G:"); Serial.print(gyro);
-        Serial.print(" A:"); Serial.print(accel); Serial.print(" M:");  Serial.print(mag); Serial.println("");
+    // Serial.println("+++++++++++++++ [Checking Calibration] +++++++++++++++"); 
+    //  Serial.print("Sys:"); Serial.print(system); Serial.print(" G:"); Serial.print(gyro);
+    //     Serial.print(" A:"); Serial.print(accel); Serial.print(" M:");  Serial.print(mag); Serial.println("");
 
     //Serial.print
 
@@ -240,26 +275,11 @@ void PositionControl::checkPosition()
         }
 }
 
-std::vector<int> PositionControl::getCurrPosition()
-{
-    sensors_event_t event;
-    bno.getEvent(&event);
-    int currAz = event.orientation.x;
-    int currEl = -event.orientation.z;
-    int currRoll = event.orientation.y;
-    
-    std::vector<int> v = {prevAz,prevEl,prevRoll};
-
-    positionCallback(currAz,currEl,currRoll);
-
-    return v;
-}
-
 void PositionControl::trackEl()
 {
     if (systemCalibrated)
     {
-        //Serial.println("========= Tracking Elevation ===========================");
+        Serial.println("========= Tracking Elevation ===========================");
         if (targEl!=prevEl)
         {
             uint8_t dir = servoDirection(targEl,prevEl,ELEVATION_SERVO);
@@ -377,9 +397,9 @@ void PositionControl::parkAntenna(int azPos, int elPos)
     
     Serial.println("********************************************************> PARKING ANTENNA");
     
-    targAz=350;
-    targEl=5;
-    targRoll=45;
+    targAz=0;
+    targEl=0;
+    targRoll=20;
     
     // int dirAz = servoDirection(355,cAz);
     // int dirEl = servoDirection(0,cEl);
@@ -398,12 +418,16 @@ void PositionControl::antennaStationaryCheck()
     {
         setTargets();
 
-        if (controlMethod!=UDP)
+        if (controlMethod=MANUAL_POSITION)
         {
            gt->start(1000);
             //return true;
         }
-        else
+        else if (controlMethod==MANUAL_SPEED)
+        {
+            gt->start(50);
+        }
+        else if (controlMethod==UDP)
         {
             gt->start(50);
         }
@@ -571,6 +595,21 @@ void PositionControl::setPositionCallback(std::function<void(int az, int el, int
 
 {
     this->positionCallback=cb;
+}
+
+std::vector<int> PositionControl::getCurrPosition()
+{
+    sensors_event_t event;
+    bno.getEvent(&event);
+    int currAz = event.orientation.x;
+    int currEl = -event.orientation.z;
+    int currRoll = event.orientation.y;
+    
+    std::vector<int> v = {prevAz,prevEl,prevRoll};
+
+    positionCallback(currAz,currEl,currRoll);
+
+    return v;
 }
 
 bool PositionControl::getCalibrationStatus()

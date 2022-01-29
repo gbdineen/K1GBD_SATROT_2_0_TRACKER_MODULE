@@ -136,32 +136,39 @@ void WS_Client::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 				pc->setControlMethod(MANUAL_SPEED);
 				// if (pc->getCalibrationStatus())
 				// {
-					if (rollcontrol=="false")
-					{
-						mc->moveServo(obj["Servo"],obj["Speed"],obj["Direction"]);	
-					}
-					else
-					{
-						mc->moveDCMotor(obj["Direction"]);
-					}
+				if (rollcontrol=="false")
+				{
+					mc->moveServo(obj["Servo"],obj["Speed"],obj["Direction"]);	
+				}
+				else
+				{
+					mc->moveDCMotor(obj["Direction"]);
+				}
 				//}
 			}
 			else if (subject == "MANUAL_POSITION")
 			{
 				pc->setControlMethod(MANUAL_POSITION);
-				if (obj["Azimuth"] || obj["Elevation"])
+				if (rollcontrol=="false")
 				{
-					pc->updateKeps(obj["Azimuth"],obj["Elevation"]);
+					if (obj["Azimuth"] || obj["Elevation"])
+					{
+						pc->updateKeps(obj["Azimuth"],obj["Elevation"]);
+					}
+				}
+				else
+				{
+					mc->moveDCMotor(obj["Direction"]);
 				}
 			}
-			else if (subject == "udpcontrol")
+			else if (subject == "udpactive")
 			{
 				String pay = (char*) payload;
 				Serial.println(pay);
-				pc->setControlMethod(UDP);
+				//pc->setControlMethod(UDP);
 				// if (obj["Azimuth"] || obj["Elevation"])
 				// {
-					pc->updateKeps(obj["Azimuth"],obj["Elevation"]);
+				pc->updateKeps(obj["Azimuth"],obj["Elevation"]);
 				// }
 			}
 			else if (subject=="controlmethod")
